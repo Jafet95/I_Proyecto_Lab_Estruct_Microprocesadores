@@ -6,7 +6,7 @@
 ;==============================Declaracion de constantes y datos============================
 
 section .data
-	cons_bienvenida: db '¡Bienvenido al juego Arkanoid!', 0xa
+	cons_bienvenida: db 0x1b,"[2J",0x1b,"[1m",0x1b,"[30G",'¡Bienvenido al juego Arkanoid!',0xa, 0xa
 	cons_size_bienvenida: equ $-cons_bienvenida
 
 	cons_title: db 'I Proyecto de EL-4313-Lab.Estructura de Microprocesadores 2S-2016', 0xa, 0xa
@@ -15,7 +15,8 @@ section .data
 	cons_player: db 'Ingrese el nombre del jugador y presione la tecla Enter: '
 	cons_size_player: equ $-cons_player
 
-	nombre_jugador: db''
+section .bss	
+	nombre_jugador: resb 10 ; se crea una variable no inicializada para guardar el nombre del jugador (10 bytes)
 
 ;==============================Código============================
 
@@ -23,6 +24,9 @@ section .text
 	 global _start
 
 _start:
+	call pantalla_inicial
+
+pantalla_inicial:
 
 	;Primer paso: Imprimir el mensaje de la pantalla inicial y captura del nombre del jugador
 
@@ -58,4 +62,6 @@ _start:
 	mov rax,60						;se carga la llamada 60d (sys_exit) en rax
 	mov rdi,0							;en rdi se carga un 0
 	syscall								;se llama al sistema.
+
+	ret
 
