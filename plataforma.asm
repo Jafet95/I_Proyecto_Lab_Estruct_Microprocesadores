@@ -295,20 +295,6 @@ _derecha:
         jmp _refresh_plataforma
 
 
-        mov rax,1                                                       ;rax = "sys_write"
-        mov rdi,1                                                       ;rdi = 1 (standard output = pantalla)
-        mov rsi,cons_espacio                        ;rsi = mensaje a imprimir
-        mov rdx,cons_sz_espacio                  ;rdx=tamano del string
-        syscall                                                         ;Llamar al sistema
-
-        mov rax,1                                                       ;rax = "sys_write"
-        mov rdi,1                                                       ;rdi = 1 (standard output = pantalla)
-        mov rsi,tecla                        ;rsi = mensaje a imprimir
-        mov rdx,1                      ;rdx=tamano del string
-        syscall                                                         ;Llamar al sistema
-
-
-
 _salida:
         call canonical_on
         call echo_on
