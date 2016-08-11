@@ -1,8 +1,26 @@
 ;------------------------------------------------------------------------------------------------$
-; prueba realizar una linea
+; prueba realizar una linea 12:06
 ;------------------------------------------------------------
+%macro limpiar_pantalla 2 	;recibe 2 parametros
+	mov rax,1	;sys_write
+	mov rdi,1	;std_out
+	mov rsi,%1	;primer parametro: caracteres especiales para limpiar la pantalla
+	mov rdx,%2	;segundo parametro: Tamano 
+	syscall
+%endmacro;---------------------------------------------------------------
+
+%macro imprimir 2 	;recibe 2 parametros
+	mov rax,1	;sys_write
+	mov rdi,1	;std_out
+	mov rsi,%1	;primer parametro: caracteres especiales para limpiar la pantalla
+	mov rdx,%2	;segundo parametro: Tamano 
+	syscall
+%endmacro;---------------------------------------------------------------
 
 section .data ; 
+
+	limpiar    db 0x1b, "[2J", 0x1b, "[H"; caracteres para limpiar la pantalla
+	limpiar_tam equ $ - limpiar
 
         cons_jugador: db 0x1b, "[1J", 0x1b, "[1;3f", 0x1b, "[1m", 0x1b, "[40;32m", ' Jugador:', 0x1b, "[40;30m",' ',  0x1b, "[40;37m"
         cons_jugador_size: equ $-cons_jugador
@@ -10,7 +28,7 @@ section .data ;
 	cons_vidas: db 0x1b, "[1;60f",  0x1b, "[1m", 0x1b, "[40;32m",  'Vidas:', 0x1b, "[40;30m",' ', 0x1b, "[40;37m",0xa
 	cons_vidas_size:equ $-cons_vidas
 
-        cons_carv: db  0x1b, "[1m", '  *' ,0xa ; caracter a dibujar para los bordes verticales
+        cons_carv: db  0x1b, "[1m", '  *                                                                                                            *' ,0xa ; caracter a dibujar para los bordes verticales
 	cons_carv_size: equ $-cons_carv
 
         cons_carh: db 0x1b, "[1m", '* '; caracter horizontal
@@ -24,9 +42,6 @@ section .data ;
 
 	cons_izquierda: db 0x1b, "[3;1f",''
 	cons_izquierda_size: equ $-cons_izquierda
-
-	cons_derecha: db '                                                                                                            '
-	cons_derecha_size: equ $-cons_derecha
 
 		;cada rectangulo es de un ancho de 10 guiones; espacios de 3
 	b11: db 0x1b, "[5;15f", 0x1b, "[42;32m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
@@ -52,202 +67,90 @@ section .data ;
         b36: db 0x1b, "[9;90f", 0x1b, "[41;31m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m",0xa
 
 ;----------------------------------------------------------------------------------------------------------
-	
-        cons_salir:db  0x1b, "[0J", '',0x1b, "[40;37m",0xa
-        cons_salir_size: equ $-cons_salir
 
+	cons_iniciar: db 0x1b, "[20;40f",'  *                          Presione X para iniciar                                *',0xa 	
+	cons_iniciar_size: equ $-cons_iniciar
+    
+	cons_perder_vida: db 0x1b, "[20;40f",'  *                    Intento fallido - Pierde una vida                 *' ,0xa	
+	cons_perder_vida_size: equ $-cons_perder_vida
+
+	cons_perder: db 0x1b, "[20;40f",'  *                                      GAME OVER!                                        *',0xa 	
+	cons_perder_size: equ $-cons_perder
+
+       cons_salir:db  0x1b, "[0J", '',0x1b, "[40;37m",0xa
+        cons_salir_size: equ $-cons_salir
+;------------------------------------------------------------------------------------------------------------
 section .text
         global _start
 
-
 _start:
+	limpiar_pantalla limpiar,limpiar_tam; funcion macro para limpiar
+
 	;imprime jugador en la primera linea
-	mov rax,1                        ;rax = "sys_write"
-        mov rdi,1                        ;rdi = 1 (standard output$
-        mov rsi,cons_jugador             ;rsi = mensaje a imprimir
-        mov rdx,cons_jugador_size        ;rdx=tamano del string
-        syscall 
+	imprimir cons_jugador  ,cons_jugador_size           
 	
 	;imprime vidas en la primera linea
-	mov rax,1                        ;rax = "sys_write"
-        mov rdi,1                        ;rdi = 1 (standard output$
-        mov rsi,cons_vidas             ;rsi = mensaje a imprimir
-        mov rdx,cons_vidas_size        ;rdx=tamano del string
-        syscall 
-
+	imprimir cons_vidas   ,cons_vidas_size  
+	
 ; colocar posicion incial sup -- -- - - - -- - - - - -- - - - - - - - - -
-	mov rax,1
-	mov rdi,1
-	mov rsi,cons_superior
-	mov rdx,cons_superior_size
-	syscall
- 
+	imprimir cons_superior   ,cons_superior_size
+
+; imprimir linea superior de techo
 	mov r9,55	; (x2=110, eso xq uso el caracter y un espacio)
 superior: cmp r9,0
 	je sig
-	mov rax,1
-	mov rdi,1
-	mov rsi, cons_carh
-	mov rdx, cons_carh_size
-	syscall
+	imprimir cons_carh  ,cons_carh_size
 	dec r9
 	jmp superior	;-----------
 
-; colocar posicion incial vertical derecha+++++++++++++++++++++++++++++++
-sig:
-	mov r9,42 ; 42 xq cuenta la fila del nombre y del marco
-posverder: 
-	mov rax,1
-	mov rdi,1
-	mov rsi,cons_derecha
-	mov rdx,cons_derecha_size
-	syscall
 
-	cmp r9,0
-	je sig2
-	mov rax,1
-	mov rdi,1
-	mov rsi, cons_carv
-	mov rdx, cons_carv_size
-	syscall
-	dec r9
-	jmp posverder
-
-; colocar posicion incial vertical izquierda****************************
-sig2:mov r9,42
-	mov rax,1
-	mov rdi,1
-	mov rsi,cons_izquierda
-	mov rdx,cons_izquierda_size
-	syscall
-posveriz: 
+; colocar posicion incial vertical ****************************
+sig:mov r9,42
+	imprimir cons_izquierda ,cons_izquierda_size
+	
+posver: 
 	cmp r9,0
 	je bloques
-	mov rax,1
-	mov rsi, cons_carv
-	mov rdx, cons_carv_size
-	syscall
+	imprimir  cons_carv , cons_carv_size
 	dec r9
-	jmp posveriz
+	jmp posver
 
 bloques:;+++++++++++++++++++++++++++++++++++++++++++++++++++++
-mov rax,1; imprime b11
-	mov rdi,1
-	mov rsi,b11
-	mov rdx,b_size
-	syscall
-	mov rax,1; imprime b12
-        mov rdi,1
-        mov rsi,b12
-        mov rdx,b_size
-        syscall
-	mov rax,1; imprime b13
-        mov rdi,1
-        mov rsi,b13
-        mov rdx,b_size
-        syscall
-	mov rax,1; imprime b14
-        mov rdi,1
-        mov rsi,b14
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b15
-        mov rdi,1
-        mov rsi,b15
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b16
-        mov rdi,1
-        mov rsi,b16
-        mov rdx,b_size
-        syscall;-------------------------------------
-
-	mov rax,1; imprime b21
-        mov rdi,1
-        mov rsi,b21
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b22
-        mov rdi,1
-        mov rsi,b22
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b23
-        mov rdi,1
-        mov rsi,b23
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b24
-        mov rdi,1
-        mov rsi,b24
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b25
-        mov rdi,1
-        mov rsi,b25
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b26
-        mov rdi,1
-        mov rsi,b26
-        mov rdx,b_size
-        syscall;-----------------------------
-
-	mov rax,1; imprime b31
-        mov rdi,1
-        mov rsi,b31
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b32
-        mov rdi,1
-        mov rsi,b32
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b33
-        mov rdi,1
-        mov rsi,b33
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b34
-        mov rdi,1
-        mov rsi,b34
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b35
-        mov rdi,1
-        mov rsi,b35
-        mov rdx,b_size
-        syscall
-        mov rax,1; imprime b36
-        mov rdi,1
-        mov rsi,b36
-        mov rdx,b_size
-        syscall
+	imprimir  b11 , b_size		; imprime b11
+	imprimir  b12 , b_size		; imprime b12
+	imprimir  b13 , b_size		; imprime b13
+	imprimir  b14 , b_size		; imprime b14
+	imprimir  b15 , b_size		; imprime b15
+	imprimir  b16 , b_size		; imprime b16
+;-------------------------------------
+	imprimir  b21 , b_size		; imprime b21
+	imprimir  b22 , b_size		; imprime b22
+	imprimir  b23 , b_size		; imprime b23
+	imprimir  b24 , b_size		; imprime b24
+	imprimir  b25 , b_size		; imprime b25
+	imprimir  b26 , b_size		; imprime b26
+;-------------------------------------
+	imprimir  b31 , b_size		; imprime b31
+	imprimir  b32 , b_size		; imprime b32
+	imprimir  b33 , b_size		; imprime b33
+	imprimir  b34 , b_size		; imprime b34
+	imprimir  b35 , b_size		; imprime b35
+	imprimir  b36 , b_size		; imprime b36
 ;-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-; colocar posicion incial inf - -- - - -- -  - -- - - -- - -- - - -- - - -- - - - -
+
+; colocar posicion incial inf 
 ;posinf:	
-	mov rax,1
-	mov rdi,1
-	mov rsi,cons_inferior
-	mov rdx,cons_inferior_size
-	syscall
+	imprimir  cons_inferior, cons_inferior_size	
 	mov r9,55
 inferior: cmp r9,0
 	je salir
-	mov rax,1
-	mov rdi,1
-	mov rsi, cons_carh
-	mov rdx, cons_carh_size
-	syscall
+	imprimir  cons_carh, cons_carh_size
 	dec r9
 	jmp inferior ; - - -- - - - --  - -- - -- - -- -- - - - - - - -
 
 salir:
-        mov rax,1                     ;rax = "sys_write"
-        mov rdi,1                     ;rdi = 1 (standard output$
-        mov rsi,cons_salir            ;rsi = mensaje a imprimir
-        mov rdx,cons_salir_size       ;rdx=tamano del string
-        syscall                       ;llamar al sistema
+	imprimir cons_salir, cons_salir_size
+
         ;Ultimo paso: Salida del programa
         mov rax,60                    ;se carga la llamada 60d (sys_exi$
         mov rdi,0                     ;en rdi se carga un 0
