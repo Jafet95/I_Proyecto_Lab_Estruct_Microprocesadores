@@ -32,7 +32,9 @@ section .data
         stdin: equ 0                             ;Standard Input (se usa stdin en lugar de escribir manualmente los valores)
         ICANON: equ 1<<1                         ;ICANON: Valor de control para encender/apagar el modo canonico
         ECHO: equ 1<<3                           ;ECHO: Valor de control para encender/apagar el modo de eco
-
+        VTIME: equ 4
+        VMIN: equ 5
+        CC_C: equ 18
 ;--------------------Declaracion de funciones y utilidades ---------------------------------------------
 
 ;####################################################
@@ -55,6 +57,8 @@ canonical_off:
         mov eax, ICANON
         not eax
         and [termios+12], eax
+        mov byte[termios+CC_C+VMIN], 0                  ;se establece el numero de caracteres minimo en cero
+        mov byte [termios+CC_C+VTIME],3                 ; se establece el tiempo de espera en 3ds
         pop rax
 
         ;Se escribe la nueva configuracion de TERMIOS
@@ -108,7 +112,8 @@ canonical_on:
 
         ;Se escribe el nuevo valor de modo Canonico
         or dword [termios+12], ICANON
-
+        mov byte[termios+CC_C+VMIN], 1
+        mov byte[termios+CC_C+VTIME], 0
         ;Se escribe la nueva configuracion de TERMIOS
         call write_stdin_termios
         ret
@@ -227,7 +232,7 @@ _refresh_plataforma:
         mov rsi,cons_erasep                             ;rsi = mensaje a imprimir
         mov rdx,cons_sz_erasep                          ;rdx=tamano del string
         syscall                                        ;llamar al sistema
-        
+
         mov r9,1
 _espacios:
         cmp r10,r9
@@ -241,16 +246,7 @@ _espacios:
         jmp _espacios                                           ;regresa a .espacios
 
 
-        mov rax,1                                                       ;rax = "sys_write"
-        mov rdi,1                                                       ;rdi = 1 (standard output = pantalla)
-        mov rsi,mov_plataforma                         ;rsi = mensaje a imprimir
-        mov rdx,1                                             ;rdx=tamano del string
-        syscall                                                         ;Llamar al sistema
-
-
-
 _plataforma:
-
         mov rax,1                                                       ;rax = "sys_write"
         mov rdi,1                                                       ;rdi = 1 (standard output = pantalla)
         mov rsi,cons_plataforma                         ;rsi = mensaje a imprimir
@@ -267,6 +263,7 @@ _read_tecla:
         syscall                                                         ;Llamar al sistema
 
         ;Tercer paso: comparar la tecla con el movimiento a la izquierda/derecha
+        push r8
         mov r8,[tecla]                                                 ;rax = tecla capturada
         mov r9,'z'                                ;rbx = constante de movimiento a la izquierda
         cmp r8,r9                                                             ;comparacion
@@ -278,9 +275,10 @@ _read_tecla:
         cmp r8,r9
         je _salida
         mov [tecla],rax
-        jne _read_tecla
+        jne _refresh_plataforma
 
 _izquierda:
+        pop r8
         cmp r10,3
         je _read_tecla
         dec r10
@@ -288,6 +286,7 @@ _izquierda:
         jmp _refresh_plataforma
 
 _derecha:
+        pop r8
         cmp r10,50
         je _read_tecla
         inc r10
