@@ -233,6 +233,7 @@ _refresh_plataforma:
         mov rdx,cons_sz_erasep                          ;rdx=tamano del string
         syscall                                        ;llamar al sistema
 
+        push r9
         mov r9,1
 _espacios:
         cmp r10,r9
@@ -247,6 +248,7 @@ _espacios:
 
 
 _plataforma:
+        pop r9
         mov rax,1                                                       ;rax = "sys_write"
         mov rdi,1                                                       ;rdi = 1 (standard output = pantalla)
         mov rsi,cons_plataforma                         ;rsi = mensaje a imprimir
@@ -264,6 +266,7 @@ _read_tecla:
 
         ;Tercer paso: comparar la tecla con el movimiento a la izquierda/derecha
         push r8
+        push r9
         mov r8,[tecla]                                                 ;rax = tecla capturada
         mov r9,'z'                                ;rbx = constante de movimiento a la izquierda
         cmp r8,r9                                                             ;comparacion
@@ -279,6 +282,7 @@ _read_tecla:
 
 _izquierda:
         pop r8
+        pop r9
         cmp r10,3
         je _read_tecla
         dec r10
@@ -287,6 +291,7 @@ _izquierda:
 
 _derecha:
         pop r8
+        pop r9
         cmp r10,50
         je _read_tecla
         inc r10
