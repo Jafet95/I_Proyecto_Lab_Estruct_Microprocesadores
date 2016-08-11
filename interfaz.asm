@@ -2,7 +2,7 @@
 ; prueba realizar una linea
 ;------------------------------------------------------------
 
-section .data ; (80 guiones)
+section .data ; 
 
         cons_jugador: db 0x1b, "[1J", 0x1b, "[1;3f", 0x1b, "[1m", 0x1b, "[40;32m", ' Jugador:', 0x1b, "[40;30m",' ',  0x1b, "[40;37m"
         cons_jugador_size: equ $-cons_jugador
@@ -28,7 +28,7 @@ section .data ; (80 guiones)
 	cons_derecha: db '                                                                                                            '
 	cons_derecha_size: equ $-cons_derecha
 
-		;cada rectangulo es de un ancho de 10 guiones; espacios de 4
+		;cada rectangulo es de un ancho de 10 guiones; espacios de 3
 	b11: db 0x1b, "[5;15f", 0x1b, "[42;32m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b_size: equ $-b11
 	b12: db 0x1b, "[5;30f", 0x1b, "[45;35m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
@@ -81,10 +81,9 @@ _start:
 	mov rsi,cons_superior
 	mov rdx,cons_superior_size
 	syscall
-
-	mov r8,0
-	mov r9,55
-superior: cmp r9,r8
+ 
+	mov r9,55	; (x2=110, eso xq uso el caracter y un espacio)
+superior: cmp r9,0
 	je sig
 	mov rax,1
 	mov rdi,1
@@ -96,7 +95,7 @@ superior: cmp r9,r8
 
 ; colocar posicion incial vertical derecha+++++++++++++++++++++++++++++++
 sig:
-	mov r10,42
+	mov r9,42 ; 42 xq cuenta la fila del nombre y del marco
 posverder: 
 	mov rax,1
 	mov rdi,1
@@ -104,34 +103,34 @@ posverder:
 	mov rdx,cons_derecha_size
 	syscall
 
-	cmp r10,r8
+	cmp r9,0
 	je sig2
 	mov rax,1
 	mov rdi,1
 	mov rsi, cons_carv
 	mov rdx, cons_carv_size
 	syscall
-	dec r10
+	dec r9
 	jmp posverder
 
 ; colocar posicion incial vertical izquierda****************************
-sig2:mov r10,42
+sig2:mov r9,42
 	mov rax,1
 	mov rdi,1
 	mov rsi,cons_izquierda
 	mov rdx,cons_izquierda_size
 	syscall
 posveriz: 
-	cmp r10,r8
+	cmp r9,0
 	je bloques
 	mov rax,1
 	mov rsi, cons_carv
 	mov rdx, cons_carv_size
 	syscall
-	dec r10
+	dec r9
 	jmp posveriz
 
-bloques:
+bloques:;+++++++++++++++++++++++++++++++++++++++++++++++++++++
 mov rax,1; imprime b11
 	mov rdi,1
 	mov rsi,b11
@@ -223,8 +222,8 @@ mov rax,1; imprime b11
         mov rdi,1
         mov rsi,b36
         mov rdx,b_size
-        syscall;-------------------------------------
-;---------------------------------------------------------------------------------------------
+        syscall
+;-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ; colocar posicion incial inf - -- - - -- -  - -- - - -- - -- - - -- - - -- - - - -
 ;posinf:	
 	mov rax,1
@@ -232,9 +231,8 @@ mov rax,1; imprime b11
 	mov rsi,cons_inferior
 	mov rdx,cons_inferior_size
 	syscall
-	mov r8,0
 	mov r9,55
-inferior: cmp r9,r8
+inferior: cmp r9,0
 	je salir
 	mov rax,1
 	mov rdi,1
@@ -243,7 +241,6 @@ inferior: cmp r9,r8
 	syscall
 	dec r9
 	jmp inferior ; - - -- - - - --  - -- - -- - -- -- - - - - - - -
-
 
 salir:
         mov rax,1                     ;rax = "sys_write"
