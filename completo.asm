@@ -111,9 +111,6 @@ section .data ;
 
 ;##############################   Datos de la plataforma  ######################################
 
-	cons_curini: db 27,"[00;57H"				;retorna el cursor a la primera fila
-	cons_sz_curini: equ 8
-
 	cons_pospl:	db 27,"[40;04H"					;ubica el cursor en la fila donde se ubica la plataforma
 	cons_sz_pospl:	equ 8
 
@@ -161,7 +158,7 @@ canonical_off:
 	not eax
 	and [termios+12], eax
 	mov byte[termios+CC_C+VMIN], 0                  ;se establece el numero de caracteres minimo en cero
-	mov byte [termios+CC_C+VTIME],1                 ; se establece el tiempo de espera en 3ds
+	mov byte [termios+CC_C+VTIME],1                 ; se establece el tiempo de espera en 1ds
 	pop rax
 
 		;Se escribe la nueva configuracion de TERMIOS
@@ -369,13 +366,13 @@ inferior:
 	jmp inferior
 
 _refresh_plataforma:						;Refresca la plataforma en caso de que se indicara movimiento
-	imprimir  cons_pospl, cons_sz_pospl
-	imprimir  cons_erasep, cons_sz_erasep
-	imprimir  cons_erasep, cons_sz_erasep
-	imprimir  cons_pospl, cons_sz_pospl
+	imprimir  cons_pospl, cons_sz_pospl		;mover cursor a la fila donde se debe colocar la plataforma
+	imprimir  cons_erasep, cons_sz_erasep	;borra la plataforma (parte 1)
+	imprimir  cons_erasep, cons_sz_erasep	;borra la plataforma (parte 2)
+	imprimir  cons_pospl, cons_sz_pospl		;vuelve a poner el cursor en la fila de la plataforma
 	push r9
 	mov r9,1
-_espacios:									;Imprime los espacios necesarios para posicionar la plataforma
+_espacios:									;Se desplaza los espacios necesarios para posicionar la plataforma
 	cmp r10,r9
 	je _plataforma
 	imprimir  cons_espacio, cons_sz_espacio				;imprime los espacios para la plataforma
@@ -385,7 +382,54 @@ _espacios:									;Imprime los espacios necesarios para posicionar la plataform
 _plataforma:								;Imprimir la plataforma
 	pop r9
 	imprimir  cons_plataforma, cons_sz_plataforma		;imprime la plataforma
-	imprimir  cons_curini, cons_sz_curini 				;para retornar el cursor al inicio
+	call _cursor_pos
+	jmp _borrar_bola
+
+_posiciones:		;reinicia los valores de las posiciones
+	mov r15, 1 		;contador para los espacios en x
+	mov r14, 1 		;contador para los espacios en y
+##############;error hacemos pop de la direccion de retorno#############	
+	pop r13
+_pos_y:
+	cmp r14, r12
+	je _pos_x
+	imprimir espacio_y, espacio_y_tam				;se mueve en un espacio hacia abajo
+	inc r14
+	jmp _pos_y
+_pos_x:
+	cmp r15,r13
+	je _regreso
+	imprimir cons_espacio, cons_sz_espacio			;se mueve un espacio hacia la derecha
+	inc r15
+	jmp _pos_x
+_regreso:
+	ret
+
+_borrar_bola:
+	call _posiciones
+	imprimir espacio, espacio_tam 					;ahora se borra la bola
+	call _cursor_pos 
+	push r13
+	push r12
+	mov r12, 0x0								;Pongo el cusor de nuevo en el inicio
+	mov r13, [condicion]
+	cmp r13, r12
+	je _imprimir_bola
+	jne _ciclos
+
+_imprimir_bola:
+	pop r13
+	pop r12
+	call _posiciones
+	imprimir bola, bola_tam						;imprime la bola
+	call _cursor_pos 							;Pongo el cusor de nuevo en el inicio
+	push r13
+	mov r13, 1									;reestablece el contador del tiempo
+_delay:											;generador del delay 
+ 	cmp r13, 10000000							;cantidad de tiempo de espera
+ 	je _read_tecla
+ 	inc r13
+ 	jmp _delay		;continua con el ciclo hasta que se cumpla el tiempo estipulado
 
 _read_tecla:								;Lectura de la tecla
 	leer tecla, 1		;Capturar una tecla presionada en el teclado
@@ -399,29 +443,58 @@ _read_tecla:								;Lectura de la tecla
 	mov r9,'c'                                  	;rbx = constante de movimiento a la derecha
 	cmp r8,r9                                   	;comparacion
 	je _derecha                                 	;salto a .derecha
+	mov r9, 'h'
+	cmp r8, r9
+	je salir
 	mov r9,'x'
 	cmp r8,r9
-	je salir
+	je _cambio_condicion
 	mov [tecla],rax
-	jne _refresh_plataforma
+	jne _refresh_plataforma							;Refresca
+
+_cambio_condicion:
+	pop r8
+	pop r9
+	mov rax, 1
+	mov [condicion], rax
+	jmp _refresh_plataforma
 
 _izquierda:									;movimiento hacia la izquierda de la plataforma
 	pop r8
 	pop r9
+	mov rax, [condicion]
+	cmp rax, 0
+	je _read_tecla
 	cmp r10,1
 	je _read_tecla
 	dec r10
 	mov [tecla],rax
-	jmp _refresh_plataforma
+	jmp _refresh_plataforma					;Refresca
 
 _derecha:									;movimiento hacia la derecha de la plataforma
 	pop r8
 	pop r9
+	mov rax, [condicion]
+	cmp rax, 0
+	je _read_tecla
 	cmp r10,100
 	je _read_tecla
 	inc r10
 	mov [tecla],rax
-	jmp _refresh_plataforma
+	jmp _refresh_plataforma						;Refresca
+
+_ciclos:
+	pop r13
+	pop r12
+	cmp r8, 0x0
+	je _ciclo_a
+	cmp r8, 0x1
+	je _ciclo_b
+	cmp r8, 0x2
+	je _ciclo_c
+	cmp r8, 0x3
+	je _ciclo_d
+
 
 ;*******************************	Movimientos en 45º	************************************
 ;Ciclos de movimiento
@@ -434,7 +507,7 @@ _ciclo_a:						;movimiento arriba-derecha
 	call _mov_arriba
 	call _mov_derecha
 	push r13
-	jmp _posiciones
+	jmp _imprimir_bola
 _ciclo_b:						;movimiento arriba-izquierda
 	mov r8, 0x1					;cambio de la constante para poder volver ciclicamente al proceso
 	cmp r12, 10					;limite superior
@@ -444,7 +517,7 @@ _ciclo_b:						;movimiento arriba-izquierda
 	call _mov_arriba
 	call _mov_izquierda
 	push r13
-	jmp _posiciones
+	jmp _imprimir_bola
 _ciclo_c:						;movimiento abajo-izquierda
 	mov r8, 0x2					;cambio de la constante para poder volver ciclicamente al proceso
 	cmp r13, 1					;limite izquierdo
@@ -454,7 +527,7 @@ _ciclo_c:						;movimiento abajo-izquierda
 	call _mov_izquierda
 	call _mov_abajo
 	push r13
-	jmp _posiciones
+	jmp _imprimir_bola
 _ciclo_d:						;movimiento abajo-derecha
 	mov r8, 0x3					;cambio de la constante para poder volver ciclicamente al proceso
 	cmp r13, 100				;limite derecho
@@ -464,7 +537,7 @@ _ciclo_d:						;movimiento abajo-derecha
 	call _mov_abajo
 	call _mov_derecha
 	push r13
-	jmp _posiciones
+	jmp _imprimir_bola
 
 ;Movimientos bàsicos
 _mov_arriba:					;movimiento hacia arriba en 45º
