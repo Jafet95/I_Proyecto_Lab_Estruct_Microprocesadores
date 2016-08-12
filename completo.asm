@@ -17,6 +17,17 @@
 	syscall
 %endmacro;---------------------------------------------------------------
 
+%macro leer 2 	;recibe 2 parametros
+	mov rax,0	;sys_read
+	mov rdi,0	;std_in
+	mov rsi,%1	;primer parametro: donde guardar el dato
+	mov rdx,%2	;segundo parametro: Tamano 
+	syscall
+%endmacro;---------------------------------------------------------------
+
+
+
+
 section .data ; 
 
 	limpiar    db 0x1b, "[2J", 0x1b, "[H"; caracteres para limpiar la pantalla
@@ -88,16 +99,22 @@ section .data ;
 
 ;##############################Codigo de la plataforma###########
 
-        cons_erasep: db 27,"[40;06H",27,"[2K"
-        cons_sz_erasep: equ 12
+		cons_curini: db 27,"[00;57H"											;retorna el cursor a la primera fila
+		cons_sz_curini: equ 8
 
-        cons_salida: db 27,"[2J",27,"[00;00H"
+		cons_pospl:	db 27,"[40;04H"												;ubica el cursor en la fila donde se ubica la plataforma
+		cons_sz_pospl:	equ 8
+
+        cons_erasep: db '                                                      ' ;espacios para borrar la plataforma
+        cons_sz_erasep: equ $-cons_erasep
+
+        cons_salida: db 27,"[2J",27,"[00;00H"									
         cons_sz_salida: equ 12
 
-        cons_espacio: db '  ' ;espacio a la izquierda de la plataforma 
+        cons_espacio: db 27,"[1C" ;espacio a la izquierda de la plataforma 
         cons_sz_espacio: equ $-cons_espacio
         
-        cons_plataforma: db 27,"[1;37m",'<========>'
+        cons_plataforma: db 27,"[1;37m",'<=======>'
         cons_sz_plataforma: equ $-cons_plataforma      ; Longitud del banner
         
         mov_plataforma: db 30
@@ -133,7 +150,7 @@ canonical_off:
         not eax
         and [termios+12], eax
         mov byte[termios+CC_C+VMIN], 0                  ;se establece el numero de caracteres minimo en cero
-        mov byte [termios+CC_C+VTIME],3                 ; se establece el tiempo de espera en 3ds
+        mov byte [termios+CC_C+VTIME],1                 ; se establece el tiempo de espera en 3ds
         pop rax
 
         ;Se escribe la nueva configuracion de TERMIOS
@@ -307,7 +324,7 @@ _start:
 
 	call canonical_off
     call echo_off
-    mov r10,25
+    mov r10,50			; define la cantidad de espacios inicial de la plataforma
 
 superior: cmp r9,0
 	je sig
@@ -365,43 +382,28 @@ inferior:
 
 _refresh_plataforma:
         ;Primer paso: Imprimir la plataforma
-        mov rax,1                                                       ;rax = "sys_write"
-        mov rdi,1                                                       ;rdi = 1 (standard output = pantalla)
-        mov rsi,cons_erasep                             ;rsi = mensaje a imprimir
-        mov rdx,cons_sz_erasep                          ;rdx=tamano del string
-        syscall                                        ;llamar al sistema
-
+        imprimir  cons_pospl, cons_sz_pospl
+        imprimir  cons_erasep, cons_sz_erasep
+        imprimir  cons_erasep, cons_sz_erasep
+        imprimir  cons_pospl, cons_sz_pospl
         push r9
         mov r9,1
 _espacios:
         cmp r10,r9
         je _plataforma
-        mov rax,1                                                       ;rax = "sys_write"
-        mov rdi,1                                                       ;rdi = 1 (standard output = pantalla)
-        mov rsi,cons_espacio                            ;rsi = mensaje a imprimir
-        mov rdx,cons_sz_espacio                            ;rdx=tamano del string
-        syscall                                                         ;Llamar al sistema
-        inc r9                                                         ;se incrementa rbx en 1
-        jmp _espacios                                           ;regresa a .espacios
+        imprimir  cons_espacio, cons_sz_espacio
+        inc r9                                                         ;se incrementa r9 en 1
+        jmp _espacios                                           ;regresa a _espacios
 
 
 _plataforma:
         pop r9
-        mov rax,1                                                       ;rax = "sys_write"
-        mov rdi,1                                                       ;rdi = 1 (standard output = pantalla)
-        mov rsi,cons_plataforma                         ;rsi = mensaje a imprimir
-        mov rdx,cons_sz_plataforma                      ;rdx=tamano del string
-        syscall                                                         ;Llamar al sistema
-
+        imprimir  cons_plataforma, cons_sz_plataforma
+        imprimir  cons_curini, cons_sz_curini 
 
 _read_tecla:
         ;Segundo paso: Capturar una tecla presionada en el teclado
-        mov rax,0                                                       ;rax = "sys_read"
-        mov rdi,0                                                       ;rdi = 0 (standard input = teclado)
-        mov rsi,tecla                                   ;rsi = direccion de memoria donde se almacena la tecla capturada
-        mov rdx,1                                                       ;rdx=1 (cuantos eventos o teclazos capturar)
-        syscall                                                         ;Llamar al sistema
-
+        leer tecla, 1
         ;Tercer paso: comparar la tecla con el movimiento a la izquierda/derecha
         push r8
         push r9
@@ -421,7 +423,7 @@ _read_tecla:
 _izquierda:
         pop r8
         pop r9
-        cmp r10,3
+        cmp r10,1
         je _read_tecla
         dec r10
         mov [tecla],rax
@@ -430,7 +432,7 @@ _izquierda:
 _derecha:
         pop r8
         pop r9
-        cmp r10,50
+        cmp r10,100
         je _read_tecla
         inc r10
         mov [tecla],rax
