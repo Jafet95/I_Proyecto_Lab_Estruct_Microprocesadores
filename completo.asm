@@ -1,31 +1,27 @@
-;------------------------------------------------------------------------------------------------$
-; prueba realizar una linea 12:06
-;------------------------------------------------------------
-%macro limpiar_pantalla 2 	;recibe 2 parametros
-	mov rax,1	;sys_write
-	mov rdi,1	;std_out
-	mov rsi,%1	;primer parametro: caracteres especiales para limpiar la pantalla
-	mov rdx,%2	;segundo parametro: Tamano 
+
+%macro limpiar_pantalla 2	 	;recibe 2 parametros
+	mov rax,1					;sys_write
+	mov rdi,1					;std_out
+	mov rsi,%1					;primer parametro: caracteres especiales para limpiar la pantalla
+	mov rdx,%2					;segundo parametro: Tamano 
 	syscall
 %endmacro;---------------------------------------------------------------
 
-%macro imprimir 2 	;recibe 2 parametros
-	mov rax,1	;sys_write
-	mov rdi,1	;std_out
-	mov rsi,%1	;primer parametro: caracteres especiales para limpiar la pantalla
-	mov rdx,%2	;segundo parametro: Tamano 
+%macro imprimir 2 				;recibe 2 parametros
+	mov rax,1					;sys_write
+	mov rdi,1					;std_out
+	mov rsi,%1					;primer parametro: caracteres especiales para limpiar la pantalla
+	mov rdx,%2					;segundo parametro: Tamano 
 	syscall
 %endmacro;---------------------------------------------------------------
 
-%macro leer 2 	;recibe 2 parametros
-	mov rax,0	;sys_read
-	mov rdi,0	;std_in
-	mov rsi,%1	;primer parametro: donde guardar el dato
-	mov rdx,%2	;segundo parametro: Tamano 
+%macro leer 2 					;recibe 2 parametros
+	mov rax,0					;sys_read
+	mov rdi,0					;std_in
+	mov rsi,%1					;primer parametro: donde guardar el dato
+	mov rdx,%2					;segundo parametro: Tamano 
 	syscall
 %endmacro;---------------------------------------------------------------
-
-
 
 
 section .data ; 
@@ -69,14 +65,14 @@ section .data ;
 	b14: db 0x1b, "[5;60f", 0x1b, "[44;34m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b15: db 0x1b, "[5;75f", 0x1b, "[41;31m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b16: db 0x1b, "[5;90f", 0x1b, "[43;33m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m",0xa
-;---------------------------------------------------------------------------------------------------------
+
 	b21: db 0x1b, "[7;15f", 0x1b, "[41;31m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b22: db 0x1b, "[7;30f", 0x1b, "[42;32m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b23: db 0x1b, "[7;45f", 0x1b, "[43;33m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b24: db 0x1b, "[7;60f", 0x1b, "[46;36m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b25: db 0x1b, "[7;75f", 0x1b, "[45;35m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b26: db 0x1b, "[7;90f", 0x1b, "[44;34m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m",0xa
-;---------------------------------------------------------------------------------------------------------
+
 	b31: db 0x1b, "[9;15f", 0x1b, "[45;35m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b32: db 0x1b, "[9;30f", 0x1b, "[46;36m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b33: db 0x1b, "[9;45f", 0x1b, "[44;34m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
@@ -84,7 +80,6 @@ section .data ;
 	b35: db 0x1b, "[9;75f", 0x1b, "[42;32m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b36: db 0x1b, "[9;90f", 0x1b, "[41;31m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m",0xa
 
-;----------------------------------------------------------------------------------------------------------
 
 	cons_iniciar: db 0x1b, "[20;40f",'  *                          Presione X para iniciar                                *',0xa 	
 	cons_iniciar_size: equ $-cons_iniciar
@@ -97,7 +92,6 @@ section .data ;
 
 	cons_salir:db  0x1b, "[0J", '',0x1b, "[40;37m",0xa
 	cons_salir_size: equ $-cons_salir
-;------------------------------------------------------------------------------------------------------------
 
 ;############################   Datos de la bola  ##############################################
 
@@ -145,17 +139,16 @@ section .data ;
 	VTIME: equ 4
 	VMIN: equ 5
 	CC_C: equ 18
+
 ;--------------------Declaracion de funciones y utilidades ---------------------------------------------
 
-;####################################################
-;canonical_off
+;#######################	canonical_off	#############################
 ;Esta es una funcion que sirve para apagar el modo canonico en Linux
 ;Cuando el modo canonico se apaga, Linux NO espera un ENTER para
 ;procesar lo que se captura desde el teclado, sino que se hace de forma
 ;directa e inmediata
 ;
 ;Para apagar el modo canonico, simplemente use: call canonical_off
-;###################################################
 canonical_off:
 
 	;Se llama a la funcion que lee el estado actual del TERMIOS en STDIN
@@ -174,18 +167,15 @@ canonical_off:
 		;Se escribe la nueva configuracion de TERMIOS
 	call write_stdin_termios
 	ret
-		;Final de la funcion
-;###################################################
+;#######################	Final de canonical_off 	 ###############################
 
 
-;####################################################
-;echo_off
+;#######################	echo_off	#############################
 ;Esta es una funcion que sirve para apagar el modo echo en Linux
 ;Cuando el modo echo se apaga, Linux NO muestra en la pantalla la tecla que
 ;se acaba de presionar.
 ;
 ;Para apagar el modo echo, simplemente use: call echo_off
-;###################################################
 echo_off:
 
 	;Se llama a la funcion que lee el estado actual del TERMIOS en STDIN
@@ -202,18 +192,15 @@ echo_off:
 		;Se escribe la nueva configuracion de TERMIOS
 	call write_stdin_termios
 	ret
-		;Final de la funcion
-;###################################################
+;#######################	Final de echo_off 	############################
 
 
-;####################################################
-;canonical_on
+;#####################	canonical_on	###############################
 ;Esta es una funcion que sirve para encender el modo canonico en Linux
 ;Cuando el modo canonico se enciende, Linux espera un ENTER para
 ;procesar lo que se captura desde el teclado
 ;
 ;Para encender el modo canonico, simplemente use: call canonical_on
-;###################################################
 canonical_on:
 
 	;Se llama a la funcion que lee el estado actual del TERMIOS en STDIN
@@ -227,18 +214,15 @@ canonical_on:
 		;Se escribe la nueva configuracion de TERMIOS
 	call write_stdin_termios
 	ret
-		;Final de la funcion
-;###################################################
+;####################	Final de canonical_on 	###############################
 
 
-;####################################################
-;echo_on
+;######################		echo_on		##############################
 ;Esta es una funcion que sirve para encender el echo en Linux
 ;Cuando el echo se enciende, Linux muestra en la pantalla (stdout) cada tecla
 ;que se recibe del teclado (stdin)
 ;
 ;Para encender el modo echo, simplemente use: call echo_on
-;###################################################
 echo_on:
 
 	;Se llama a la funcion que lee el estado actual del TERMIOS en STDIN
@@ -251,19 +235,16 @@ echo_on:
 		;Se escribe la nueva configuracion de TERMIOS
 	call write_stdin_termios
 	ret
-		;Final de la funcion
-;###################################################
+;######################		Final de echo_on		#############################
 
 
-;####################################################
-;read_stdin_termios
+;###################### 	read_stdin_termios 		##############################
 ;Esta es una funcion que sirve para leer la configuracion actual del stdin o 
 ;teclado directamente de Linux
 ;Esta configuracion se conoce como TERMIOS (Terminal Input/Output Settings)
 ;Los valores del stdin se cargan con EAX=36h y llamada a la interrupcion 80h
 ;
 ;Para utilizarlo, simplemente se usa: call read_stdin_termios
-;###################################################
 read_stdin_termios:
 	push rax
 	push rbx
@@ -281,19 +262,16 @@ read_stdin_termios:
 	pop rbx
 	pop rax
 	ret
-		;Final de la funcion
-;###################################################
+;####################	Final de read_stdin_termios		###############################
 
 
-;####################################################
-;write_stdin_termios
+;#######################	write_stdin_termios		#############################
 ;Esta es una funcion que sirve para escribir la configuracion actual del stdin o 
 ;teclado directamente de Linux
 ;Esta configuracion se conoce como TERMIOS (Terminal Input/Output Settings)
 ;Los valores del stdin se cargan con EAX=36h y llamada a la interrupcion 80h
 ;
 ;Para utilizarlo, simplemente se usa: call write_stdin_termios
-;###################################################
 write_stdin_termios:
 	push rax
 	push rbx
@@ -311,18 +289,16 @@ write_stdin_termios:
 	pop rbx
 	pop rax
 	ret
-		;Final de la funcion
-;###################################################
+		;
+;##################		Final de write_stdin_termios	#################################
 
 
 section .text
 	global _start
 
 _start:
-	limpiar_pantalla limpiar,limpiar_tam; funcion macro para limpiar
-
-;imprime jugador en la primera linea
-	imprimir cons_jugador  ,cons_jugador_size           
+	limpiar_pantalla limpiar,limpiar_tam			;limpia la pantalla
+	imprimir cons_jugador  ,cons_jugador_size  		;imprime jugador en la primera linea
 	
 ;imprime vidas en la primera linea
 	imprimir cons_vidas   ,cons_vidas_size  
@@ -330,21 +306,16 @@ _start:
 	imprimir cons_corazon2   ,cons_corazon_size
 	imprimir cons_corazon3   ,cons_corazon_size
 	
-; colocar posicion incial superior
-	imprimir cons_superior   ,cons_superior_size
+	imprimir cons_superior   ,cons_superior_size		;imprimir linea superior de techo
 
-; imprimir linea superior de techo
-	mov r9,55		; (55x2=110, eso xq uso el caracter y un espacio)
-
-	call canonical_off
-	call echo_off
-	mov r10,50			; define la cantidad de espacios inicial de la plataforma
-
-; define los valores de los registros para los movimientos de la bola
-	mov r13, 55 			; se usa r13 como cte_posicion_x
- 	mov r12, 39				; se usa r12 como cte_posicion_y
- 	mov r8, 0x0
- 	push r13
+	call canonical_off 		;apaga la funcion canonical	
+	call echo_off 			;apaga la funcion echo
+	mov r9,55				;(55x2=110, eso xq uso el caracter y un espacio)
+	mov r10,50				;define la cantidad de espacios inicial de la plataforma
+	mov r13, 55 			;se inicializa r13 usado para posicion en x de la bola
+	mov r12, 39				;se inicializa r12 usado para posicion en y de la bola
+	mov r8, 0x0				;se inicializa r8 usado para referirse al ciclo de movimiento de la bola
+	push r13				;se ingresa en el stack el valor de r13 (necesario por los procesos del ciclo del movimiento de la bola)
 
 superior: cmp r9,0
 	je sig
@@ -352,19 +323,18 @@ superior: cmp r9,0
 	dec r9
 	jmp superior	
 
-; colocar posicion incial vertical 
-sig:mov r9,42
+sig:						;colocar posicion incial vertical 
+	mov r9,42
 	imprimir cons_izquierda ,cons_izquierda_size
 
-; imprimir los caracteres verticales	
-posver: 
+posver: 					;imprimir los caracteres verticales	
 	cmp r9,0
 	je bloques
 	imprimir  cons_carv , cons_carv_size
 	dec r9
 	jmp posver
 
-;Imprime bloques++++++++++++++++++++++++++++++++++
+;+++++++++++++++++++++++++	Imprime bloques		++++++++++++++++++++++++++++++++++
 bloques:	
 	imprimir  b11 , b_size		; imprime b11
 	imprimir  b12 , b_size		; imprime b12
@@ -372,24 +342,23 @@ bloques:
 	imprimir  b14 , b_size		; imprime b14
 	imprimir  b15 , b_size		; imprime b15
 	imprimir  b16 , b_size		; imprime b16
-;-------------------------------------
+
 	imprimir  b21 , b_size		; imprime b21
 	imprimir  b22 , b_size		; imprime b22
 	imprimir  b23 , b_size		; imprime b23
 	imprimir  b24 , b_size		; imprime b24
 	imprimir  b25 , b_size		; imprime b25
 	imprimir  b26 , b_size		; imprime b26
-;-------------------------------------
+
 	imprimir  b31 , b_size		; imprime b31
 	imprimir  b32 , b_size		; imprime b32
 	imprimir  b33 , b_size		; imprime b33
 	imprimir  b34 , b_size		; imprime b34
 	imprimir  b35 , b_size		; imprime b35
 	imprimir  b36 , b_size		; imprime b36
-;-++++++++++++++++++++++++++++++++++++++++++++++++++
+;-+++++++++++++++++++	Fin de impresión de bloques		+++++++++++++++++++++++++++++++
 
-; colocar cursor posicion incial inf 
-;posinf:	
+;colocar cursor posicion incial inf 	
 	imprimir  cons_inferior, cons_inferior_size	
 	mov r9,55
 inferior: 
@@ -397,50 +366,46 @@ inferior:
 	je _refresh_plataforma
 	imprimir  cons_carh, cons_carh_size
 	dec r9
-	jmp inferior ; - - -- - - - --  - -- - -- - -- -- - - - - - - -
+	jmp inferior
 
-
-_refresh_plataforma:
-		;Primer paso: Imprimir la plataforma
+_refresh_plataforma:						;Refresca la plataforma en caso de que se indicara movimiento
 	imprimir  cons_pospl, cons_sz_pospl
 	imprimir  cons_erasep, cons_sz_erasep
 	imprimir  cons_erasep, cons_sz_erasep
 	imprimir  cons_pospl, cons_sz_pospl
 	push r9
 	mov r9,1
-_espacios:
+_espacios:									;Imprime los espacios necesarios para posicionar la plataforma
 	cmp r10,r9
 	je _plataforma
-	imprimir  cons_espacio, cons_sz_espacio
-	inc r9                                                         ;se incrementa r9 en 1
-	jmp _espacios                                           ;regresa a _espacios
+	imprimir  cons_espacio, cons_sz_espacio				;imprime los espacios para la plataforma
+	inc r9                                              ;se incrementa r9 en 1
+	jmp _espacios                                       ;regresa a _espacios
 
-
-_plataforma:
+_plataforma:								;Imprimir la plataforma
 	pop r9
-	imprimir  cons_plataforma, cons_sz_plataforma
-	imprimir  cons_curini, cons_sz_curini 
+	imprimir  cons_plataforma, cons_sz_plataforma		;imprime la plataforma
+	imprimir  cons_curini, cons_sz_curini 				;para retornar el cursor al inicio
 
-_read_tecla:
-		;Segundo paso: Capturar una tecla presionada en el teclado
-	leer tecla, 1
-		;Tercer paso: comparar la tecla con el movimiento a la izquierda/derecha
+_read_tecla:								;Lectura de la tecla
+	leer tecla, 1		;Capturar una tecla presionada en el teclado
+	;Comparar la tecla con el movimiento a la izquierda/derecha
 	push r8
 	push r9
-	mov r8,[tecla]                                                 ;rax = tecla capturada
-	mov r9,'z'                                ;rbx = constante de movimiento a la izquierda
-	cmp r8,r9                                                             ;comparacion
-	je _izquierda                                                   ;salto a .izquierda
-	mov r9,'c'                                 ;rbx = constante de movimiento a la derecha
-	cmp r8,r9                                                            ;comparacion
-	je _derecha                                                     ;salto a .derecha
+	mov r8,[tecla]                           	    ;rax = tecla capturada
+	mov r9,'z'                               	    ;rbx = constante de movimiento a la izquierda
+	cmp r8,r9                                	    ;comparacion
+	je _izquierda                            	    ;salto a .izquierda
+	mov r9,'c'                                  	;rbx = constante de movimiento a la derecha
+	cmp r8,r9                                   	;comparacion
+	je _derecha                                 	;salto a .derecha
 	mov r9,'x'
 	cmp r8,r9
 	je salir
 	mov [tecla],rax
 	jne _refresh_plataforma
 
-_izquierda:						;movimiento hacia la izquierda de la plataforma
+_izquierda:									;movimiento hacia la izquierda de la plataforma
 	pop r8
 	pop r9
 	cmp r10,1
@@ -449,7 +414,7 @@ _izquierda:						;movimiento hacia la izquierda de la plataforma
 	mov [tecla],rax
 	jmp _refresh_plataforma
 
-_derecha:						;movimiento hacia la derecha de la plataforma
+_derecha:									;movimiento hacia la derecha de la plataforma
 	pop r8
 	pop r9
 	cmp r10,100
@@ -459,7 +424,7 @@ _derecha:						;movimiento hacia la derecha de la plataforma
 	jmp _refresh_plataforma
 
 ;*******************************	Movimientos en 45º	************************************
-;--------------------------------  Ciclos de movimiento  ----------------------------------
+;Ciclos de movimiento
 _ciclo_a:						;movimiento arriba-derecha
 	mov r8, 0x0					;cambio de la constante para poder volver ciclicamente al proceso
 	cmp r15, 100				;limite derecho
@@ -501,7 +466,7 @@ _ciclo_d:						;movimiento abajo-derecha
 	push r13
 	jmp _posiciones
 
-;-----------------------------   Movimientos bàsicos  --------------------------------------
+;Movimientos bàsicos
 _mov_arriba:					;movimiento hacia arriba en 45º
 	dec r12
 	ret
@@ -514,21 +479,19 @@ _mov_abajo:						;movimiento hacia abajo en 45º
 _mov_izquierda:					;movimiento hacia izquierda en 45º
 	dec r13
 	ret
+
 ;******************************	Fin Movimientos en 45º	*******************************
 
 _cursor_pos:					;genera que el cursor se coloque al inicio de la pantalla
- 	imprimir set_cursor, set_cursor_tam
+	imprimir set_cursor, set_cursor_tam
 	ret
 
 salir:
-	imprimir cons_salir, cons_salir_size
-;vuelve a encender los procesos
-	call canonical_on					
-	call echo_on
-
-;Ultimo paso: Salida del programa
-	mov rax,60                    ;se carga la llamada 60d (sys_exit
-	mov rdi,0                     ;en rdi se carga un 0
-	syscall                       ;se llama al sistema.
+	imprimir cons_salir, cons_salir_size	
+	call canonical_on  						;vuelve a encender canonical			
+	call echo_on 							;vuelve a encender echo
+	mov rax,60          				    ;se carga la llamada 60d (sys_exit
+	mov rdi,0              				    ;en rdi se carga un 0
+	syscall                				    ;se llama al sistema.
 
 ;fin del programa
