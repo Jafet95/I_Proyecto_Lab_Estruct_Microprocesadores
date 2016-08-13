@@ -1,4 +1,3 @@
-
 %macro limpiar_pantalla 2	 	;recibe 2 parametros
 	mov rax,1					;sys_write
 	mov rdi,1					;std_out
@@ -98,7 +97,7 @@ section .data ;
 	set_cursor: db 27,'[00;00H' 
 	set_cursor_tam: equ $-set_cursor
 
-	bola: db 27, '[1m', 111				;Caracter de la bola
+	bola: db 27, '[1m', '⁕'				;Caracter de la bola  ⁕ ✺ ●
 	bola_tam: equ $-bola
 
 	espacio: db ' '						;Para borrar la bola
@@ -107,7 +106,7 @@ section .data ;
 	espacio_y: db 27, "[1E"				;Para moverse en y
 	espacio_y_tam: equ $-espacio_y
 
-	condicion: db 0						;condicion para cambiar de imprimir a borrar y viceversa
+	condicion: dq 0					;condicion para cambiar de imprimir a borrar y viceversa
 
 ;##############################   Datos de la plataforma  ######################################
 
@@ -123,7 +122,7 @@ section .data ;
 	cons_espacio: db 27,"[1C" ;espacio a la izquierda de la plataforma y para la bola
 	cons_sz_espacio: equ $-cons_espacio
 		
-	cons_plataforma: db 27,"[1;37m",'<=======>'
+	cons_plataforma: db 27,"[47;37m",'_________', 27, '[0m'
 	cons_sz_plataforma: equ $-cons_plataforma      ; Longitud del banner
 		
 	mov_plataforma: db 30
@@ -309,10 +308,9 @@ _start:
 	call echo_off 			;apaga la funcion echo
 	mov r9,55				;(55x2=110, eso xq uso el caracter y un espacio)
 	mov r10,50				;define la cantidad de espacios inicial de la plataforma
-	mov r13, 55 			;se inicializa r13 usado para posicion en x de la bola
+	mov r13, 57 			;se inicializa r13 usado para posicion en x de la bola
 	mov r12, 39				;se inicializa r12 usado para posicion en y de la bola
 	mov r8, 0x0				;se inicializa r8 usado para referirse al ciclo de movimiento de la bola
-	push r13				;se ingresa en el stack el valor de r13 (necesario por los procesos del ciclo del movimiento de la bola)
 
 superior: cmp r9,0
 	je sig
@@ -388,8 +386,6 @@ _plataforma:								;Imprimir la plataforma
 _posiciones:		;reinicia los valores de las posiciones
 	mov r15, 1 		;contador para los espacios en x
 	mov r14, 1 		;contador para los espacios en y
-##############;error hacemos pop de la direccion de retorno#############	
-	pop r13
 _pos_y:
 	cmp r14, r12
 	je _pos_x
@@ -409,29 +405,30 @@ _borrar_bola:
 	call _posiciones
 	imprimir espacio, espacio_tam 					;ahora se borra la bola
 	call _cursor_pos 
-	push r13
-	push r12
-	mov r12, 0x0								;Pongo el cusor de nuevo en el inicio
-	mov r13, [condicion]
-	cmp r13, r12
+	push r15																						
+	push r14
+	mov r14, 0								;Pongo el cusor de nuevo en el inicio
+	mov r15, [condicion]
+	cmp r15, r14
 	je _imprimir_bola
 	jne _ciclos
 
 _imprimir_bola:
-	pop r13
-	pop r12
+	pop r14
+	pop r15
 	call _posiciones
 	imprimir bola, bola_tam						;imprime la bola
 	call _cursor_pos 							;Pongo el cusor de nuevo en el inicio
 	push r13
 	mov r13, 1									;reestablece el contador del tiempo
 _delay:											;generador del delay 
- 	cmp r13, 10000000							;cantidad de tiempo de espera
+ 	cmp r13, 100000000							;cantidad de tiempo de espera
  	je _read_tecla
  	inc r13
  	jmp _delay		;continua con el ciclo hasta que se cumpla el tiempo estipulado
 
 _read_tecla:								;Lectura de la tecla
+	pop r13
 	leer tecla, 1		;Capturar una tecla presionada en el teclado
 	;Comparar la tecla con el movimiento a la izquierda/derecha
 	push r8
@@ -450,18 +447,20 @@ _read_tecla:								;Lectura de la tecla
 	cmp r8,r9
 	je _cambio_condicion
 	mov [tecla],rax
+	pop r9
+	pop r8
 	jne _refresh_plataforma							;Refresca
 
 _cambio_condicion:
-	pop r8
 	pop r9
+	pop r8
 	mov rax, 1
 	mov [condicion], rax
 	jmp _refresh_plataforma
 
 _izquierda:									;movimiento hacia la izquierda de la plataforma
-	pop r8
 	pop r9
+	pop r8
 	mov rax, [condicion]
 	cmp rax, 0
 	je _read_tecla
@@ -470,10 +469,9 @@ _izquierda:									;movimiento hacia la izquierda de la plataforma
 	dec r10
 	mov [tecla],rax
 	jmp _refresh_plataforma					;Refresca
-
 _derecha:									;movimiento hacia la derecha de la plataforma
-	pop r8
 	pop r9
+	pop r8
 	mov rax, [condicion]
 	cmp rax, 0
 	je _read_tecla
@@ -484,8 +482,8 @@ _derecha:									;movimiento hacia la derecha de la plataforma
 	jmp _refresh_plataforma						;Refresca
 
 _ciclos:
-	pop r13
-	pop r12
+	pop r14
+	pop r15
 	cmp r8, 0x0
 	je _ciclo_a
 	cmp r8, 0x1
@@ -495,12 +493,11 @@ _ciclos:
 	cmp r8, 0x3
 	je _ciclo_d
 
-
 ;*******************************	Movimientos en 45º	************************************
 ;Ciclos de movimiento
 _ciclo_a:						;movimiento arriba-derecha
 	mov r8, 0x0					;cambio de la constante para poder volver ciclicamente al proceso
-	cmp r15, 100				;limite derecho
+	cmp r15, 111				;limite derecho
 	je _ciclo_b
 	cmp r14, 10					;limite superior
 	je _ciclo_d
@@ -512,7 +509,7 @@ _ciclo_b:						;movimiento arriba-izquierda
 	mov r8, 0x1					;cambio de la constante para poder volver ciclicamente al proceso
 	cmp r12, 10					;limite superior
 	je _ciclo_c
-	cmp r13, 1					;limite izquierdo
+	cmp r13, 4					;limite izquierdo
 	je _ciclo_a
 	call _mov_arriba
 	call _mov_izquierda
@@ -520,7 +517,7 @@ _ciclo_b:						;movimiento arriba-izquierda
 	jmp _imprimir_bola
 _ciclo_c:						;movimiento abajo-izquierda
 	mov r8, 0x2					;cambio de la constante para poder volver ciclicamente al proceso
-	cmp r13, 1					;limite izquierdo
+	cmp r13, 4					;limite izquierdo
 	je _ciclo_d
 	cmp r12, 39					;limite inferior
 	je _ciclo_b	
@@ -530,7 +527,7 @@ _ciclo_c:						;movimiento abajo-izquierda
 	jmp _imprimir_bola
 _ciclo_d:						;movimiento abajo-derecha
 	mov r8, 0x3					;cambio de la constante para poder volver ciclicamente al proceso
-	cmp r13, 100				;limite derecho
+	cmp r13, 111				;limite derecho
 	je _ciclo_c
 	cmp r12, 39					;limite inferior
 	je _ciclo_a
@@ -552,7 +549,6 @@ _mov_abajo:						;movimiento hacia abajo en 45º
 _mov_izquierda:					;movimiento hacia izquierda en 45º
 	dec r13
 	ret
-
 ;******************************	Fin Movimientos en 45º	*******************************
 
 _cursor_pos:					;genera que el cursor se coloque al inicio de la pantalla
