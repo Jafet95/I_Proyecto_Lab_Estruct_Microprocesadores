@@ -56,29 +56,31 @@ section .data ;
 	cons_izquierda: db 0x1b, "[3;1f",''
 	cons_izquierda_size: equ $-cons_izquierda
 
-		;cada rectangulo es de un ancho de 10 guiones; espacios de 3
-	b11: db  0x1b, "[5;15f",0x1b, "[42;32m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+		;cada rectangulo es de un ancho de 18 y el ultimo es de 17 guiones
+	b11: db  0x1b, "[5;4f",0x1b, "[42;32m",    '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
 	b_size: equ $-b11
-	b12: db 0x1b, "[5;30f", 0x1b, "[45;35m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b13: db 0x1b, "[5;45f", 0x1b, "[46;36m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b14: db 0x1b, "[5;60f", 0x1b, "[44;34m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b15: db 0x1b, "[5;75f", 0x1b, "[41;31m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b16: db 0x1b, "[5;90f", 0x1b, "[43;33m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m",0xa
+	b12: db 0x1b, "[5;22f", 0x1b, "[45;35m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b13: db 0x1b, "[5;40f", 0x1b, "[46;36m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b14: db 0x1b, "[5;58f", 0x1b, "[44;34m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b15: db 0x1b, "[5;76f", 0x1b, "[41;31m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b16: db 0x1b, "[5;93f", 0x1b, "[43;33m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b1_size: equ $-b16
 
-	b21: db 0x1b, "[7;15f", 0x1b, "[41;31m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b22: db 0x1b, "[7;30f", 0x1b, "[42;32m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b23: db 0x1b, "[7;45f", 0x1b, "[43;33m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b24: db 0x1b, "[7;60f", 0x1b, "[46;36m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b25: db 0x1b, "[7;75f", 0x1b, "[45;35m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b26: db 0x1b, "[7;90f", 0x1b, "[44;34m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m",0xa
+	b21: db 0x1b, "[6;4f", 0x1b, "[41;31m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b22: db 0x1b, "[6;22f", 0x1b, "[42;32m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b23: db 0x1b, "[6;40f", 0x1b, "[43;33m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b24: db 0x1b, "[6;58f", 0x1b, "[46;36m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b25: db 0x1b, "[6;76f", 0x1b, "[45;35m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b26: db 0x1b, "[6;93f", 0x1b, "[44;34m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b2_size: equ $-b26
 
-	b31: db 0x1b, "[9;15f", 0x1b, "[45;35m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b32: db 0x1b, "[9;30f", 0x1b, "[46;36m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b33: db 0x1b, "[9;45f", 0x1b, "[44;34m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b34: db 0x1b, "[9;60f", 0x1b, "[43;33m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b35: db 0x1b, "[9;75f", 0x1b, "[42;32m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b36: db 0x1b, "[9;90f", 0x1b, "[41;31m", '__________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m",0xa
-
+	b31: db 0x1b, "[7;4f", 0x1b, "[45;35m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b32: db 0x1b, "[7;22f", 0x1b, "[46;36m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b33: db 0x1b, "[7;40f", 0x1b, "[44;34m",     '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b34: db 0x1b, "[7;58f", 0x1b, "[43;33m",     '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b35: db 0x1b, "[7;76f", 0x1b, "[42;32m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b36: db 0x1b, "[7;93f", 0x1b, "[41;31m",     '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b3_size: equ $-b36
 
 	cons_iniciar: db 0x1b, "[20;40f",'  *                          Presione X para iniciar                                *',0xa 	
 	cons_iniciar_size: equ $-cons_iniciar
@@ -294,13 +296,7 @@ section .text
 
 _start:
 	limpiar_pantalla limpiar,limpiar_tam			;limpia la pantalla
-	imprimir cons_jugador  ,cons_jugador_size  		;imprime jugador en la primera linea
-	
-;imprime vidas en la primera linea
-	imprimir cons_vidas   ,cons_vidas_size  
-	imprimir cons_corazon1   ,cons_corazon_size
-	imprimir cons_corazon2   ,cons_corazon_size
-	imprimir cons_corazon3   ,cons_corazon_size
+
 	
 	imprimir cons_superior   ,cons_superior_size		;imprimir linea superior de techo
 
@@ -336,21 +332,21 @@ bloques:
 	imprimir  b13 , b_size		; imprime b13
 	imprimir  b14 , b_size		; imprime b14
 	imprimir  b15 , b_size		; imprime b15
-	imprimir  b16 , b_size		; imprime b16
+	imprimir  b16 , b1_size	; imprime b16
 
 	imprimir  b21 , b_size		; imprime b21
 	imprimir  b22 , b_size		; imprime b22
 	imprimir  b23 , b_size		; imprime b23
 	imprimir  b24 , b_size		; imprime b24
 	imprimir  b25 , b_size		; imprime b25
-	imprimir  b26 , b_size		; imprime b26
+	imprimir  b26 , b2_size	; imprime b26
 
 	imprimir  b31 , b_size		; imprime b31
 	imprimir  b32 , b_size		; imprime b32
 	imprimir  b33 , b_size		; imprime b33
 	imprimir  b34 , b_size		; imprime b34
 	imprimir  b35 , b_size		; imprime b35
-	imprimir  b36 , b_size		; imprime b36
+	imprimir  b36 , b3_size	; imprime b36
 ;-+++++++++++++++++++	Fin de impresión de bloques		+++++++++++++++++++++++++++++++
 
 ;colocar cursor posicion incial inf 	
@@ -362,6 +358,15 @@ inferior:
 	imprimir  cons_carh, cons_carh_size
 	dec r9
 	jmp inferior
+
+
+	imprimir cons_jugador  ,cons_jugador_size  		;imprime jugador en la primera linea
+	
+;imprime vidas en la primera linea
+	imprimir cons_vidas   ,cons_vidas_size  
+	imprimir cons_corazon1   ,cons_corazon_size
+	imprimir cons_corazon2   ,cons_corazon_size
+	imprimir cons_corazon3   ,cons_corazon_size
 
 _refresh_plataforma:						;Refresca la plataforma en caso de que se indicara movimiento
 	imprimir  cons_pospl, cons_sz_pospl		;mover cursor a la fila donde se debe colocar la plataforma
