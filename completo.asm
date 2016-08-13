@@ -125,7 +125,7 @@ section .data ;
 	cons_plataforma: db 27,"[47;37m",'_________', 27, '[0m'
 	cons_sz_plataforma: equ $-cons_plataforma      ; Longitud del banner
 		
-	mov_plataforma: db 30
+	cons_mov_plataforma: dq 4
 	tecla:  db''   
 		
 	termios: times 36 db 0                   ;Estructura de 36bytes que contiene el modo de operacion de la consola
@@ -381,7 +381,14 @@ _plataforma:								;Imprimir la plataforma
 	pop r9
 	imprimir  cons_plataforma, cons_sz_plataforma		;imprime la plataforma
 	call _cursor_pos
-	jmp _borrar_bola
+	mov rax, [cons_mov_plataforma]
+	cmp rax,4
+	je _borrar_bola
+_bpoint:
+	mov rax, [cons_mov_plataforma]
+	cmp rax,1
+	je _borrar_bola
+	jmp _read_tecla
 
 _posiciones:		;reinicia los valores de las posiciones
 	mov r15, 1 		;contador para los espacios en x
@@ -402,6 +409,8 @@ _regreso:
 	ret
 
 _borrar_bola:
+	mov rax,4
+	mov [cons_mov_plataforma],rax
 	call _posiciones
 	imprimir espacio, espacio_tam 					;ahora se borra la bola
 	call _cursor_pos 
@@ -422,13 +431,14 @@ _imprimir_bola:
 	push r13
 	mov r13, 1									;reestablece el contador del tiempo
 _delay:											;generador del delay 
- 	cmp r13, 100000000							;cantidad de tiempo de espera
- 	je _read_tecla
+ 	cmp r13, 10000000							;cantidad de tiempo de espera
+ 	je _r_tecla
  	inc r13
  	jmp _delay		;continua con el ciclo hasta que se cumpla el tiempo estipulado
 
-_read_tecla:								;Lectura de la tecla
+_r_tecla:
 	pop r13
+_read_tecla:								;Lectura de la tecla
 	leer tecla, 1		;Capturar una tecla presionada en el teclado
 	;Comparar la tecla con el movimiento a la izquierda/derecha
 	push r8
@@ -449,14 +459,14 @@ _read_tecla:								;Lectura de la tecla
 	mov [tecla],rax
 	pop r9
 	pop r8
-	jne _refresh_plataforma							;Refresca
+	jmp _borrar_bola							;Refresca
 
 _cambio_condicion:
 	pop r9
 	pop r8
 	mov rax, 1
 	mov [condicion], rax
-	jmp _refresh_plataforma
+	jmp _borrar_bola
 
 _izquierda:									;movimiento hacia la izquierda de la plataforma
 	pop r9
@@ -465,9 +475,14 @@ _izquierda:									;movimiento hacia la izquierda de la plataforma
 	cmp rax, 0
 	je _read_tecla
 	cmp r10,1
-	je _read_tecla
+	je _borrar_bola
 	dec r10
 	mov [tecla],rax
+	push r10
+	mov r10, [cons_mov_plataforma]
+	dec r10
+	mov [cons_mov_plataforma],r10
+	pop r10
 	jmp _refresh_plataforma					;Refresca
 _derecha:									;movimiento hacia la derecha de la plataforma
 	pop r9
@@ -476,9 +491,14 @@ _derecha:									;movimiento hacia la derecha de la plataforma
 	cmp rax, 0
 	je _read_tecla
 	cmp r10,100
-	je _read_tecla
+	je _borrar_bola
 	inc r10
 	mov [tecla],rax
+	push r10
+	mov r10, [cons_mov_plataforma]
+	dec r10
+	mov [cons_mov_plataforma],r10
+	pop r10
 	jmp _refresh_plataforma						;Refresca
 
 _ciclos:
