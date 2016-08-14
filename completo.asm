@@ -36,12 +36,12 @@ section .data ;
 	cons_vidas: db 0x1b, "[44;60f",  0x1b, "[1m", 0x1b, "[40;36m",  'Vidas:', 0x1b, "[40;30m",' ', 0x1b, "[40;37m",0xa
 	cons_vidas_size:equ $-cons_vidas
 
-	cons_corazon1: db 0x1b, "[44;68f", '♥'
-	cons_corazon2: db 0x1b, "[44;70f", '♥'
-	cons_corazon3: db 0x1b, "[44;72f", '♥',0xa
-	cons_corazon_size: equ $- cons_corazon1
+	cons_corazon1: db 27, "[44;68H", '♥'
+	cons_corazon2: db 27, "[44;70H", '♥'
+	cons_corazon3: db 27, "[44;72H", '♥'
+	cons_corazon1_size: equ 11
 
-	cons_carv: db  0x1b, "[1m", '  +                                                                                                            *' ,0xa ; caracter a dibujar para los bordes verticales
+	cons_carv: db  0x1b, "[1m", '  *                                                                                                            *' ,0xa ; caracter a dibujar para los bordes verticales
 	cons_carv_size: equ $-cons_carv
 
 	cons_carh: db 0x1b, "[1m", '* '; caracter horizontal
@@ -53,7 +53,7 @@ section .data ;
 	cons_inferior: db 0x1b, "[43;1f", '  '	;esquina inferior izquierda
 	cons_inferior_size: equ $-cons_inferior
 
-	cons_izquierda: db 0x1b, "[3;1f",''
+	cons_izquierda: db 0x1b, "[3;1f"
 	cons_izquierda_size: equ $-cons_izquierda
 
 		;cada rectangulo es de un ancho de 18 y el ultimo es de 17 guiones
@@ -314,13 +314,25 @@ sig:						;colocar posicion incial vertical
 
 posver: 					;imprimir los caracteres verticales	
 	cmp r9,0
-	je bloques
+	je inf
 	imprimir  cons_carv , cons_carv_size
 	dec r9
 	jmp posver
 
+;colocar cursor posicion incial inf 
+inf:	
+	imprimir  cons_inferior, cons_inferior_size	
+	mov r9,55
+inferior: 
+	cmp r9,0
+	je bloques
+	imprimir  cons_carh, cons_carh_size
+	dec r9
+	jmp inferior
+
 ;+++++++++++++++++++++++++	Imprime bloques		++++++++++++++++++++++++++++++++++
 bloques:	
+	imprimir set_cursor,set_cursor_tam
 	imprimir  b11 , b_size		; imprime b11
 	imprimir  b12 , b_size		; imprime b12
 	imprimir  b13 , b_size		; imprime b13
@@ -343,24 +355,16 @@ bloques:
 	imprimir  b36 , b3_size	; imprime b36
 ;-+++++++++++++++++++	Fin de impresión de bloques		+++++++++++++++++++++++++++++++
 
-;colocar cursor posicion incial inf 	
-	imprimir  cons_inferior, cons_inferior_size	
-	mov r9,55
-inferior: 
-	cmp r9,0
-	je jugador
-	imprimir  cons_carh, cons_carh_size
-	dec r9
-	jmp inferior
 
+imprimir set_cursor,set_cursor_tam
 jugador:
 	imprimir cons_jugador  ,cons_jugador_size  		;imprime jugador en la primera linea
 	
 ;imprime vidas en la primera linea
 	imprimir cons_vidas   ,cons_vidas_size  
-	imprimir cons_corazon1   ,cons_corazon_size
-	imprimir cons_corazon2   ,cons_corazon_size
-	imprimir cons_corazon3   ,cons_corazon_size
+	imprimir cons_corazon1   ,cons_corazon1_size
+	imprimir cons_corazon2   ,cons_corazon1_size
+	imprimir cons_corazon3   ,cons_corazon1_size
 
 _refresh_plataforma:						;Refresca la plataforma en caso de que se indicara movimiento
 	imprimir  cons_pospl, cons_sz_pospl		;mover cursor a la fila donde se debe colocar la plataforma
