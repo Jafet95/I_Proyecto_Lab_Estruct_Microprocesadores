@@ -58,29 +58,43 @@ section .data ;
 
 		;cada rectangulo es de un ancho de 18 y el ultimo es de 17 guiones
 	b11: db  0x1b, "[5;4f",0x1b, "[42;32m",  '__________________', 0x1b, "[40;37m"
-	b_size: equ $-b11
+	b11_size: equ $-b11
 	b12: db 0x1b, "[5;22f", 0x1b, "[45;35m", '__________________', 0x1b, "[40;37m"
+	b12_size: equ $-b12
 	b13: db 0x1b, "[5;40f", 0x1b, "[46;36m", '__________________', 0x1b, "[40;37m"
+	b13_size: equ $-b13
 	b14: db 0x1b, "[5;58f", 0x1b, "[44;34m", '__________________', 0x1b, "[40;37m"
+	b14_size: equ $-b14
 	b15: db 0x1b, "[5;76f", 0x1b, "[41;31m", '__________________', 0x1b, "[40;37m"
+	b15_size: equ $-b15
 	b16: db 0x1b, "[5;94f", 0x1b, "[43;33m", '__________________', 0x1b, "[40;37m"
-	b1_size: equ $-b16
+	b16_size: equ $-b16
 
 	b21: db 0x1b, "[6;4f", 0x1b, "[41;31m",  '__________________', 0x1b, "[40;37m"
+	b21_size: equ $-b21
 	b22: db 0x1b, "[6;22f", 0x1b, "[42;32m", '__________________', 0x1b, "[40;37m"
+	b22_size: equ $-b22
 	b23: db 0x1b, "[6;40f", 0x1b, "[43;33m", '__________________', 0x1b, "[40;37m"
+	b23_size: equ $-b23
 	b24: db 0x1b, "[6;58f", 0x1b, "[46;36m", '__________________', 0x1b, "[40;37m"
+	b24_size: equ $-b24
 	b25: db 0x1b, "[6;76f", 0x1b, "[45;35m", '__________________', 0x1b, "[40;37m"
+	b25_size: equ $-b25
 	b26: db 0x1b, "[6;94f", 0x1b, "[44;34m", '__________________', 0x1b, "[40;37m"
-	b2_size: equ $-b26
+	b26_size: equ $-b26
 
 	b31: db 0x1b, "[7;4f",  0x1b, "[45;35m",  '__________________', 0x1b, "[40;37m"
+	b31_size: equ $-b31
 	b32: db 0x1b, "[7;22f", 0x1b, "[46;36m",  '__________________', 0x1b,"[40;37m"
+	b32_size: equ $-b32
 	b33: db 0x1b, "[7;40f", 0x1b, "[44;34m",  '__________________', 0x1b, "[40;37m"
+	b33_size: equ $-b33
 	b34: db 0x1b, "[7;58f", 0x1b, "[43;33m",  '__________________', 0x1b, "[40;37m"
+	b34_size: equ $-b34
 	b35: db 0x1b, "[7;76f", 0x1b, "[42;32m",  '__________________', 0x1b, "[40;37m"
+	b35_size: equ $-b35
 	b36: db 0x1b, "[7;94f", 0x1b, "[41;31m",  '__________________', 0x1b, "[40;37m"
-	b3_size: equ $-b36
+	b36_size: equ $-b36
 
 	cons_iniciar: db 0x1b, "[20;40f",'  *                          Presione X para iniciar                                *',0xa 	
 	cons_iniciar_size: equ $-cons_iniciar
@@ -333,26 +347,26 @@ inferior:
 ;+++++++++++++++++++++++++	Imprime bloques		++++++++++++++++++++++++++++++++++
 bloques:	
 	imprimir set_cursor,set_cursor_tam
-	imprimir  b11 , b_size		; imprime b11
-	imprimir  b12 , b_size		; imprime b12
-	imprimir  b13 , b_size		; imprime b13
-	imprimir  b14 , b_size		; imprime b14
-	imprimir  b15 , b_size		; imprime b15
-	imprimir  b16 , b1_size	; imprime b16
+	imprimir  b11 , b11_size		; imprime b11
+	imprimir  b12 , b12_size		; imprime b12
+	imprimir  b13 , b13_size		; imprime b13
+	imprimir  b14 , b14_size		; imprime b14
+	imprimir  b15 , b15_size		; imprime b15
+	imprimir  b16 , b16_size		; imprime b16
 
-	imprimir  b21 , b_size		; imprime b21
-	imprimir  b22 , b_size		; imprime b22
-	imprimir  b23 , b_size		; imprime b23
-	imprimir  b24 , b_size		; imprime b24
-	imprimir  b25 , b_size		; imprime b25
-	imprimir  b26 , b2_size	; imprime b26
+	imprimir  b21 , b21_size		; imprime b21
+	imprimir  b22 , b22_size		; imprime b22
+	imprimir  b23 , b23_size		; imprime b23
+	imprimir  b24 , b24_size		; imprime b24
+	imprimir  b25 , b25_size		; imprime b25
+	imprimir  b26 , b26_size		; imprime b26
 
-	imprimir  b31 , b_size		; imprime b31
-	imprimir  b32 , b_size		; imprime b32
-	imprimir  b33 , b_size		; imprime b33
-	imprimir  b34 , b_size		; imprime b34
-	imprimir  b35 , b_size		; imprime b35
-	imprimir  b36 , b3_size	; imprime b36
+	imprimir  b31 , b31_size		; imprime b31
+	imprimir  b32 , b32_size		; imprime b32
+	imprimir  b33 , b33_size		; imprime b33
+	imprimir  b34 , b34_size		; imprime b34
+	imprimir  b35 , b35_size		; imprime b35
+	imprimir  b36 , b36_size		; imprime b36
 ;-+++++++++++++++++++	Fin de impresión de bloques		+++++++++++++++++++++++++++++++
 
 
