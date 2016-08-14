@@ -109,6 +109,7 @@ section .data ;
 	espacio_y_tam: equ $-espacio_y
 
 	condicion: dq 0					;condicion para cambiar de imprimir a borrar y viceversa
+	posicion_plataf: dq 0
 
 ;##############################   Datos de la plataforma  ######################################
 
@@ -124,7 +125,7 @@ section .data ;
 	cons_espacio: db 27,"[1C" ;espacio a la izquierda de la plataforma y para la bola
 	cons_sz_espacio: equ $-cons_espacio
 		
-	cons_plataforma: db 27,"[47;37m",'_________', 27, '[0m'
+	cons_plataforma: db 27,"[43;30;2m",'[‡‡‡‡‡‡‡]', 27, '[0m'
 	cons_sz_plataforma: equ $-cons_plataforma      ; Longitud del banner
 		
 	cons_mov_plataforma: dq 4
@@ -139,7 +140,6 @@ section .data ;
 	CC_C: equ 18
 
 ;--------------------Declaracion de funciones y utilidades ---------------------------------------------
-
 ;#######################	canonical_off	#############################
 ;Esta es una funcion que sirve para apagar el modo canonico en Linux
 ;Cuando el modo canonico se apaga, Linux NO espera un ENTER para
@@ -167,7 +167,6 @@ canonical_off:
 	ret
 ;#######################	Final de canonical_off 	 ###############################
 
-
 ;#######################	echo_off	#############################
 ;Esta es una funcion que sirve para apagar el modo echo en Linux
 ;Cuando el modo echo se apaga, Linux NO muestra en la pantalla la tecla que
@@ -192,7 +191,6 @@ echo_off:
 	ret
 ;#######################	Final de echo_off 	############################
 
-
 ;#####################	canonical_on	###############################
 ;Esta es una funcion que sirve para encender el modo canonico en Linux
 ;Cuando el modo canonico se enciende, Linux espera un ENTER para
@@ -214,7 +212,6 @@ canonical_on:
 	ret
 ;####################	Final de canonical_on 	###############################
 
-
 ;######################		echo_on		##############################
 ;Esta es una funcion que sirve para encender el echo en Linux
 ;Cuando el echo se enciende, Linux muestra en la pantalla (stdout) cada tecla
@@ -234,7 +231,6 @@ echo_on:
 	call write_stdin_termios
 	ret
 ;######################		Final de echo_on		#############################
-
 
 ;###################### 	read_stdin_termios 		##############################
 ;Esta es una funcion que sirve para leer la configuracion actual del stdin o 
@@ -262,7 +258,6 @@ read_stdin_termios:
 	ret
 ;####################	Final de read_stdin_termios		###############################
 
-
 ;#######################	write_stdin_termios		#############################
 ;Esta es una funcion que sirve para escribir la configuracion actual del stdin o 
 ;teclado directamente de Linux
@@ -289,7 +284,6 @@ write_stdin_termios:
 	ret
 		;
 ;##################		Final de write_stdin_termios	#################################
-
 
 section .text
 	global _start
@@ -384,6 +378,7 @@ _espacios:									;Se desplaza los espacios necesarios para posicionar la plata
 
 _plataforma:								;Imprimir la plataforma
 	pop r9
+	mov [posicion_plataf], r10
 	imprimir  cons_plataforma, cons_sz_plataforma		;imprime la plataforma
 	call _cursor_pos
 	mov rax, [cons_mov_plataforma]
@@ -545,17 +540,44 @@ _ciclo_c:						;movimiento abajo-izquierda
 	cmp r13, 4					;limite izquierdo
 	je _ciclo_d
 	cmp r12, 39					;limite inferior
-	je _ciclo_b	
+	je .verificar_plataf			;voy a verificar que esté la plataforma debajo de la bola para que rebote
+	jne .continuar
+.verificar_plataf:				;verifica si estamos en la posición donde se encuentra la plataforma
+	cmp r13, r10
+	jge .verificar_plat_fin		;implica que podemos estar en la plataforma, hay que ver si estamos dentro o fuera
+	jnge _perder_vida			;implica que no estamos muy a la izquierda de la plataforma
+.verificar_plat_fin:			;verificamos que estemos dentro de la plataforma
+	mov rax, 9
+	add [posicion_plataf], rax	;nos movemos los nueve espacios que son la longitud de la plataforma desde el inicio de ella
+	mov rax, [posicion_plataf]
+	cmp r13, rax
+	jnge _ciclo_b 				;implica que nos encontramos dentro de ella y por ende debemos rebotar
+	jmp _perder_vida			; implica que estamos fuera de la plataforma y debemos perder una vida
+.continuar:						; en caso de que no hayamos llegado a la posición límite
 	call _mov_izquierda
 	call _mov_abajo
 	push r13
 	jmp _imprimir_bola
+
 _ciclo_d:						;movimiento abajo-derecha
 	mov r8, 0x3					;cambio de la constante para poder volver ciclicamente al proceso
 	cmp r13, 111				;limite derecho
 	je _ciclo_c
 	cmp r12, 39					;limite inferior
-	je _ciclo_a
+	je .verificar_platafor			;voy a verificar que esté la plataforma debajo de la bola para que rebote
+	jne .continua
+.verificar_platafor:				;verifica si estamos en la posición donde se encuentra la plataforma
+	cmp r13, r10
+	jge .verificar_plat_final		;implica que podemos estar en la plataforma, hay que ver si estamos dentro o fuera
+	jnge _perder_vida			;implica que no estamos muy a la izquierda de la plataforma
+.verificar_plat_final:			;verificamos que estemos dentro de la plataforma
+	mov rax, 9
+	add [posicion_plataf], rax	;nos movemos los nueve espacios que son la longitud de la plataforma desde el inicio de ella
+	mov rax, [posicion_plataf]
+	cmp r13, rax
+	jnge _ciclo_a 				;implica que nos encontramos dentro de ella y por ende debemos rebotar
+	jge _perder_vida			; implica que estamos fuera de la plataforma y debemos perder una vida
+.continua:						; en caso de que no hayamos llegado a la posición límite
 	call _mov_abajo
 	call _mov_derecha
 	push r13
@@ -575,6 +597,15 @@ _mov_izquierda:					;movimiento hacia izquierda en 45º
 	dec r13
 	ret
 ;******************************	Fin Movimientos en 45º	*******************************
+
+_perder_vida:
+	push r15
+	mov r15, 1
+.tiempo:
+	cmp r15, 100000000
+	je salir
+	inc r15
+	jmp .tiempo
 
 _cursor_pos:					;genera que el cursor se coloque al inicio de la pantalla
 	imprimir set_cursor, set_cursor_tam
