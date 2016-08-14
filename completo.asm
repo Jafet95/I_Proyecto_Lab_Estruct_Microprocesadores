@@ -127,10 +127,31 @@ section .data ;
 		
 	cons_plataforma: db 27,"[43;30;2m",'[‡‡‡‡‡‡‡]', 27, '[0m'
 	cons_sz_plataforma: equ $-cons_plataforma      ; Longitud del banner
-		
+
+	
 	cons_mov_plataforma: dq 4
 	tecla:  db''   
 		
+;##############################   Datos de la pantalla principal  ######################################
+	
+	cons_game: db 27, "[20;46H",'Bienvenido a Micronoid'   ;nombre del juego
+	cons_sz_game: equ $-cons_game
+
+	cons_curso: db 27, "[40;6H",'EL-4313-Lab. Estructura de Microprocesadores'   ;nombre del curso
+	cons_sz_curso: equ $-cons_curso
+
+	cons_semestre: db 27, "[41;6H",'2S-2016'   ;nombre del semestre
+	cons_sz_semestre: equ $-cons_semestre
+
+	cons_usuario: db 27, "[30;20H",'Ingrese el nombre del jugador: '   ;solicitud de nombre de usuario
+	cons_sz_usuario: equ $-cons_usuario
+
+	player: db '                    '
+	sz_player: equ 20
+
+
+;##############################   Datos del termios  ######################################
+
 	termios: times 36 db 0                   ;Estructura de 36bytes que contiene el modo de operacion de la consola
 	stdin: equ 0                             ;Standard Input (se usa stdin en lugar de escribir manualmente los valores)
 	ICANON: equ 1<<1                         ;ICANON: Valor de control para encender/apagar el modo canonico
@@ -289,13 +310,28 @@ section .text
 	global _start
 
 _start:
+
+;############################pantalla principal#########################################
+_pantalla_principal:
+	call _recuadro
+	imprimir cons_game, cons_sz_game
+	imprimir cons_curso,cons_sz_curso
+	imprimir cons_semestre,cons_sz_semestre
+	imprimir cons_usuario, cons_sz_usuario
+	leer player,sz_player
+	jmp _canonicos
+	
+
+;############################ fin pantalla principal #########################################
+
+
+_recuadro:
 	limpiar_pantalla limpiar,limpiar_tam			;limpia la pantalla
 
 	
 	imprimir cons_superior   ,cons_superior_size		;imprimir linea superior de techo
 
-	call canonical_off 		;apaga la funcion canonical	
-	call echo_off 			;apaga la funcion echo
+	
 	mov r9,55				;(55x2=110, eso xq uso el caracter y un espacio)
 	mov r10,50				;define la cantidad de espacios inicial de la plataforma
 	mov r13, 57 			;se inicializa r13 usado para posicion en x de la bola
@@ -325,11 +361,18 @@ inf:
 	mov r9,55
 inferior: 
 	cmp r9,0
-	je bloques
+	je regreso
 	imprimir  cons_carh, cons_carh_size
 	dec r9
 	jmp inferior
+regreso:
+	ret
 
+
+_canonicos:
+	call canonical_off 		;apaga la funcion canonical	
+	call echo_off 			;apaga la funcion echo
+	call _recuadro
 ;+++++++++++++++++++++++++	Imprime bloques		++++++++++++++++++++++++++++++++++
 bloques:	
 	imprimir set_cursor,set_cursor_tam
@@ -359,7 +402,7 @@ bloques:
 imprimir set_cursor,set_cursor_tam
 jugador:
 	imprimir cons_jugador  ,cons_jugador_size  		;imprime jugador en la primera linea
-	
+	imprimir player,sz_player
 ;imprime vidas en la primera linea
 	imprimir cons_vidas   ,cons_vidas_size  
 	imprimir cons_corazon1   ,cons_corazon1_size
