@@ -30,18 +30,18 @@ section .data ;
 	limpiar    db 0x1b, "[2J", 0x1b, "[H", 0x1b ,'[?25l'; caracteres para limpiar la pantalla
 	limpiar_tam equ $ - limpiar
 
-	cons_jugador: db 0x1b, "[1J", 0x1b, "[1;3f", 0x1b, "[1m", 0x1b, "[40;32m", ' Jugador:', 0x1b, "[40;30m",' ',  0x1b, "[40;37m"
+	cons_jugador: db 0x1b, "[44;3f", 0x1b, "[1m", 0x1b, "[40;36m", ' Jugador:', 0x1b, "[40;30m",' ',  0x1b, "[40;37m"
 	cons_jugador_size: equ $-cons_jugador
 
-	cons_vidas: db 0x1b, "[1;60f",  0x1b, "[1m", 0x1b, "[40;32m",  'Vidas:', 0x1b, "[40;30m",' ', 0x1b, "[40;37m",0xa
+	cons_vidas: db 0x1b, "[44;60f",  0x1b, "[1m", 0x1b, "[40;36m",  'Vidas:', 0x1b, "[40;30m",' ', 0x1b, "[40;37m",0xa
 	cons_vidas_size:equ $-cons_vidas
 
-	cons_corazon1: db 0x1b, "[1;68f", '♥'
-	cons_corazon2: db 0x1b, "[1;70f", '♥'
-	cons_corazon3: db 0x1b, "[1;72f", '♥',0xa
+	cons_corazon1: db 0x1b, "[44;68f", '♥'
+	cons_corazon2: db 0x1b, "[44;70f", '♥'
+	cons_corazon3: db 0x1b, "[44;72f", '♥',0xa
 	cons_corazon_size: equ $- cons_corazon1
 
-	cons_carv: db  0x1b, "[1m", '  *                                                                                                            *' ,0xa ; caracter a dibujar para los bordes verticales
+	cons_carv: db  0x1b, "[1m", '  +                                                                                                            *' ,0xa ; caracter a dibujar para los bordes verticales
 	cons_carv_size: equ $-cons_carv
 
 	cons_carh: db 0x1b, "[1m", '* '; caracter horizontal
@@ -57,29 +57,29 @@ section .data ;
 	cons_izquierda_size: equ $-cons_izquierda
 
 		;cada rectangulo es de un ancho de 18 y el ultimo es de 17 guiones
-	b11: db  0x1b, "[5;4f",0x1b, "[42;32m",    '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b11: db  0x1b, "[5;4f",0x1b, "[42;32m",  '__________________', 0x1b, "[40;37m"
 	b_size: equ $-b11
-	b12: db 0x1b, "[5;22f", 0x1b, "[45;35m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b13: db 0x1b, "[5;40f", 0x1b, "[46;36m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b14: db 0x1b, "[5;58f", 0x1b, "[44;34m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b15: db 0x1b, "[5;76f", 0x1b, "[41;31m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b16: db 0x1b, "[5;93f", 0x1b, "[43;33m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b12: db 0x1b, "[5;22f", 0x1b, "[45;35m", '__________________', 0x1b, "[40;37m"
+	b13: db 0x1b, "[5;40f", 0x1b, "[46;36m", '__________________', 0x1b, "[40;37m"
+	b14: db 0x1b, "[5;58f", 0x1b, "[44;34m", '__________________', 0x1b, "[40;37m"
+	b15: db 0x1b, "[5;76f", 0x1b, "[41;31m", '__________________', 0x1b, "[40;37m"
+	b16: db 0x1b, "[5;94f", 0x1b, "[43;33m", '__________________', 0x1b, "[40;37m"
 	b1_size: equ $-b16
 
-	b21: db 0x1b, "[6;4f", 0x1b, "[41;31m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b22: db 0x1b, "[6;22f", 0x1b, "[42;32m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b23: db 0x1b, "[6;40f", 0x1b, "[43;33m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b24: db 0x1b, "[6;58f", 0x1b, "[46;36m", '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b25: db 0x1b, "[6;76f", 0x1b, "[45;35m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b26: db 0x1b, "[6;93f", 0x1b, "[44;34m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b21: db 0x1b, "[6;4f", 0x1b, "[41;31m",  '__________________', 0x1b, "[40;37m"
+	b22: db 0x1b, "[6;22f", 0x1b, "[42;32m", '__________________', 0x1b, "[40;37m"
+	b23: db 0x1b, "[6;40f", 0x1b, "[43;33m", '__________________', 0x1b, "[40;37m"
+	b24: db 0x1b, "[6;58f", 0x1b, "[46;36m", '__________________', 0x1b, "[40;37m"
+	b25: db 0x1b, "[6;76f", 0x1b, "[45;35m", '__________________', 0x1b, "[40;37m"
+	b26: db 0x1b, "[6;94f", 0x1b, "[44;34m", '__________________', 0x1b, "[40;37m"
 	b2_size: equ $-b26
 
-	b31: db 0x1b, "[7;4f", 0x1b, "[45;35m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b32: db 0x1b, "[7;22f", 0x1b, "[46;36m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b33: db 0x1b, "[7;40f", 0x1b, "[44;34m",     '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b34: db 0x1b, "[7;58f", 0x1b, "[43;33m",     '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b35: db 0x1b, "[7;76f", 0x1b, "[42;32m",  '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
-	b36: db 0x1b, "[7;93f", 0x1b, "[41;31m",     '__________________', 0x1b, "[40;30m",'   ',0x1b, "[40;37m"
+	b31: db 0x1b, "[7;4f",  0x1b, "[45;35m",  '__________________', 0x1b, "[40;37m"
+	b32: db 0x1b, "[7;22f", 0x1b, "[46;36m",  '__________________', 0x1b,"[40;37m"
+	b33: db 0x1b, "[7;40f", 0x1b, "[44;34m",  '__________________', 0x1b, "[40;37m"
+	b34: db 0x1b, "[7;58f", 0x1b, "[43;33m",  '__________________', 0x1b, "[40;37m"
+	b35: db 0x1b, "[7;76f", 0x1b, "[42;32m",  '__________________', 0x1b, "[40;37m"
+	b36: db 0x1b, "[7;94f", 0x1b, "[41;31m",  '__________________', 0x1b, "[40;37m"
 	b3_size: equ $-b36
 
 	cons_iniciar: db 0x1b, "[20;40f",'  *                          Presione X para iniciar                                *',0xa 	
@@ -309,7 +309,7 @@ superior: cmp r9,0
 	jmp superior	
 
 sig:						;colocar posicion incial vertical 
-	mov r9,42
+	mov r9,40
 	imprimir cons_izquierda ,cons_izquierda_size
 
 posver: 					;imprimir los caracteres verticales	
@@ -348,12 +348,12 @@ bloques:
 	mov r9,55
 inferior: 
 	cmp r9,0
-	je _refresh_plataforma
+	je jugador
 	imprimir  cons_carh, cons_carh_size
 	dec r9
 	jmp inferior
 
-
+jugador:
 	imprimir cons_jugador  ,cons_jugador_size  		;imprime jugador en la primera linea
 	
 ;imprime vidas en la primera linea
