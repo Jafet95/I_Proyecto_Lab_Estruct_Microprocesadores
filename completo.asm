@@ -23,6 +23,9 @@
 %endmacro;---------------------------------------------------------------
 
 
+section .bss ; $Revision: 1.6 $
+family		resd	48						;variable de nombre del fabricante
+
 section .data ; 
 
 ;########################  Datos de la Interfaz  ################################################
@@ -91,7 +94,7 @@ section .data ;
 	cons_perder: db 0x1b, "[20;40f",'  *                                      GAME OVER!                                        *',0xa 	
 	cons_perder_size: equ $-cons_perder
 
-	cons_salir:db  0x1b, "[0J", '',0x1b, "[40;37m",0xa
+	cons_salir:db  0x1b, "[2J", '',0x1b, "[40;37m",27,"[00;00H"
 	cons_salir_size: equ $-cons_salir
 
 ;############################   Datos de la bola  ##############################################
@@ -99,7 +102,7 @@ section .data ;
 	set_cursor: db 27,'[00;00H' 
 	set_cursor_tam: equ $-set_cursor
 
-	bola: db 27, '[1m', '⁕'				;Caracter de la bola  ⁕ ✺ ●
+	bola: db 27, '[37;1m', '⁕'				;Caracter de la bola  ⁕ ✺ ●
 	bola_tam: equ $-bola
 
 	espacio: db ' '						;Para borrar la bola
@@ -148,6 +151,92 @@ section .data ;
 
 	player: db '                    '
 	sz_player: equ 20
+
+;##############################   Datos de las colisiones  ######################################
+
+	fila_bloque: dq 0
+	columna_izq: dq 0
+	;limites derechos de las columnas
+	columna_a_d: dq 21
+	columna_b_d: dq 39
+	columna_c_d: dq 57
+	columna_d_d: dq 75
+	columna_e_d: dq 93
+	columna_f_d: dq 111
+	;limites izquierdos de las columnas
+	columna_a_i: dq 4
+	columna_b_i: dq 22
+	columna_c_i: dq 40
+	columna_d_i: dq 58
+	columna_e_i: dq 76
+	columna_f_i: dq 94
+
+
+
+	bloque1: dq 1								; el uno es indicador de que el bloque se encuentra activo
+	bloque2: dq 1
+	bloque3: dq 1
+	bloque4: dq 1
+	bloque5: dq 1
+	bloque6: dq 1
+	bloque7: dq 1
+	bloque8: dq 1
+	bloque9: dq 1
+	bloque10: dq 1
+	bloque11: dq 1
+	bloque12: dq 1
+	bloque13: dq 1
+	bloque14: dq 1
+	bloque15: dq 1
+	bloque16: dq 1
+	bloque17: dq 1
+	bloque18: dq 1
+
+	bb11: db  27, "[5;4H",27, "[40;30m",  '                   ',0x1b,"[00;00H"
+	bb_size: equ $-bb11 
+	bb12: db 0x1b, "[5;22f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb13: db 0x1b, "[5;40f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb14: db 0x1b, "[5;58f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb15: db 0x1b, "[5;76f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb16: db 0x1b, "[5;94f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb1_size: equ 35
+
+	bb21: db 0x1b, "[6;4f", 0x1b, "[40;30m",  '                  ',0x1b,"[00;00H"
+	bb22: db 0x1b, "[6;22f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb23: db 0x1b, "[6;40f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb24: db 0x1b, "[6;58f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb25: db 0x1b, "[6;76f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb26: db 0x1b, "[6;94f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
+	bb2_size: equ $-bb26
+
+	bb31: db 0x1b, "[7;04f",  0x1b, "[40;30m",  '                  ',0x1b,"[00;00H"
+	bb32: db 0x1b, "[7;22f", 0x1b, "[40;30m",  '                  ',0x1b,"[00;00H"
+	bb33: db 0x1b, "[7;40f", 0x1b, "[40;30m",  '                  ',0x1b,"[00;00H"
+	bb34: db 0x1b, "[7;58f", 0x1b, "[40;30m",  '                  ',0x1b,"[00;00H"
+	bb35: db 0x1b, "[7;76f", 0x1b, "[40;30m",  '                  ',0x1b,"[00;00H"
+	bb36: db 0x1b, "[7;94f", 0x1b, "[40;30m",  '                  ',0x1b,"[00;00H"
+	bb3_size: equ $-bb35
+
+;##############################   Datos de la pantalla de salida  ######################################
+
+	cons_despedida: db 27, "[20;43H",'Gracias por jugar Micronoid'   ;despedida del juego
+	cons_sz_despedida: equ $-cons_despedida
+
+	cons_inst_salida: db 27, "[22;43H",'Presione Enter para terminar'   ;instruccion de salida del juego
+	cons_sz_inst_salida: equ $-cons_inst_salida
+
+	cons_johan: db 27, "[39;6H",'Johan Arrieta Solórzano     2013021822'   ;nombre johan
+	cons_sz_johan: equ $-cons_johan
+	cons_melissa: db 27, "[38;6H",'Melissa Fonseca Rodríguez   2013027576'   ;nombre melissa
+	cons_sz_melissa: equ $-cons_melissa
+	cons_dayi: db 27, "[40;6H",'Dayhana Sanchez Jimenez     201281852'   ;nombre dayhana
+	cons_sz_dayi: equ $-cons_dayi
+	cons_jafet: db 27, "[41;6H",'Jafet Chaves Barrantes      2013037524'   ;nombre jafet
+	cons_sz_jafet: equ $-cons_jafet
+
+	cons_posfamily: db 27, "[41;63H"
+	cons_sz_posfamily: equ $-cons_posfamily
+
 
 
 ;##############################   Datos del termios  ######################################
@@ -530,6 +619,7 @@ _izquierda:									;movimiento hacia la izquierda de la plataforma
 	dec r10
 	mov [cons_mov_plataforma],r10
 	pop r10
+	mov [posicion_plataf], r10
 	jmp _refresh_plataforma					;Refresca
 _derecha:									;movimiento hacia la derecha de la plataforma
 	pop r9
@@ -546,6 +636,7 @@ _derecha:									;movimiento hacia la derecha de la plataforma
 	dec r10
 	mov [cons_mov_plataforma],r10
 	pop r10
+	mov [posicion_plataf], r10
 	jmp _refresh_plataforma						;Refresca
 
 _ciclos:
@@ -566,31 +657,52 @@ _ciclo_a:						;movimiento arriba-derecha
 	mov r8, 0x0					;cambio de la constante para poder volver ciclicamente al proceso
 	cmp r15, 111				;limite derecho
 	je _ciclo_b
-	cmp r14, 10					;limite superior
+
+	cmp r14, 5					;limite superior
 	je _ciclo_d
+	cmp r14, 6					;limite superior
+	je _colisiones_1
+	cmp r14, 7					;limite superior
+	je _colisiones_2
+	cmp r14, 8					;limite superior
+	je _colisiones_3
+_continue_a:
 	call _mov_arriba
 	call _mov_derecha
 	push r13
 	jmp _imprimir_bola
 _ciclo_b:						;movimiento arriba-izquierda
 	mov r8, 0x1					;cambio de la constante para poder volver ciclicamente al proceso
-	cmp r12, 10					;limite superior
-	je _ciclo_c
-	cmp r13, 4					;limite izquierdo
+	cmp r15, 4					;limite izquierdo
 	je _ciclo_a
+	
+	cmp r14, 5					;limite superior
+	je _ciclo_c
+	cmp r14, 6					;limite superior
+	je _colisiones_1
+	cmp r14, 7					;limite superior
+	je _colisiones_2
+	cmp r14, 8					;limite superior
+	je _colisiones_3
+_continue_b:
 	call _mov_arriba
 	call _mov_izquierda
 	push r13
 	jmp _imprimir_bola
+
+
 _ciclo_c:						;movimiento abajo-izquierda
 	mov r8, 0x2					;cambio de la constante para poder volver ciclicamente al proceso
-	cmp r13, 4					;limite izquierdo
+	cmp r15, 4					;limite izquierdo
 	je _ciclo_d
-	cmp r12, 39					;limite inferior
+	cmp r14, 39					;limite inferior
 	je .verificar_plataf			;voy a verificar que esté la plataforma debajo de la bola para que rebote
 	jne .continuar
 .verificar_plataf:				;verifica si estamos en la posición donde se encuentra la plataforma
-	cmp r13, r10
+	mov rax, 3
+	add [posicion_plataf], rax
+	mov rax, [posicion_plataf]
+	cmp r15, rax
 	jge .verificar_plat_fin		;implica que podemos estar en la plataforma, hay que ver si estamos dentro o fuera
 	jnge _perder_vida			;implica que no estamos muy a la izquierda de la plataforma
 .verificar_plat_fin:			;verificamos que estemos dentro de la plataforma
@@ -608,13 +720,16 @@ _ciclo_c:						;movimiento abajo-izquierda
 
 _ciclo_d:						;movimiento abajo-derecha
 	mov r8, 0x3					;cambio de la constante para poder volver ciclicamente al proceso
-	cmp r13, 111				;limite derecho
+	cmp r15, 111				;limite derecho
 	je _ciclo_c
-	cmp r12, 39					;limite inferior
+	cmp r14, 39					;limite inferior
 	je .verificar_platafor			;voy a verificar que esté la plataforma debajo de la bola para que rebote
 	jne .continua
 .verificar_platafor:				;verifica si estamos en la posición donde se encuentra la plataforma
-	cmp r13, r10
+	mov rax, 3
+	add [posicion_plataf], rax
+	mov rax, [posicion_plataf]
+	cmp r15, rax
 	jge .verificar_plat_final		;implica que podemos estar en la plataforma, hay que ver si estamos dentro o fuera
 	jnge _perder_vida			;implica que no estamos muy a la izquierda de la plataforma
 .verificar_plat_final:			;verificamos que estemos dentro de la plataforma
@@ -658,9 +773,276 @@ _cursor_pos:					;genera que el cursor se coloque al inicio de la pantalla
 	imprimir set_cursor, set_cursor_tam
 	ret
 
+;******************************* proceso de colisiones ******************************
+_colisiones_3:
+	push r10
+	cmp r15, [columna_b_i]						;segundo columna de bloques
+	jnge _borrar_bloque_a3			;implica choque con la primera columna
+	cmp r15,  [columna_c_i]						;tercera columna de bloques
+	jnge _borrar_bloque_b3			;implica choque con la segunda columna
+	cmp r15, [columna_d_i]						;cuarta columna de bloques
+	jnge _borrar_bloque_c3			;implica choque con la tercera columna
+	cmp r15, [columna_e_i] 					;quinta columna de bloques
+	jnge _borrar_bloque_d3			;implica choque con la cuarta columna
+	cmp r15, [columna_f_i]						;sexta columna de bloques
+	jnge _borrar_bloque_e3			;implica choque con la quinta colmna
+	jge _borrar_bloque_f3			;implica choque con la sexta columna
+
+_colisiones_2:
+	push r10
+	cmp r15, [columna_b_i]						;segundo columna de bloques
+	jnge _borrar_bloque_a2			;implica choque con la primera columna
+	cmp r15,  [columna_c_i]						;tercera columna de bloques
+	jnge _borrar_bloque_b2			;implica choque con la segunda columna
+	cmp r15, [columna_d_i]						;cuarta columna de bloques
+	jnge _borrar_bloque_c2			;implica choque con la tercera columna
+	cmp r15, [columna_e_i] 					;quinta columna de bloques
+	jnge _borrar_bloque_d2			;implica choque con la cuarta columna
+	cmp r15, [columna_f_i]						;sexta columna de bloques
+	jnge _borrar_bloque_e2			;implica choque con la quinta colmna
+	jge _borrar_bloque_f2			;implica choque con la sexta columna
+
+_colisiones_1:
+	push r10
+	cmp r15, [columna_b_i]						;segundo columna de bloques
+	jnge _borrar_bloque_a1			;implica choque con la primera columna
+	cmp r15,  [columna_c_i]						;tercera columna de bloques
+	jnge _borrar_bloque_b1			;implica choque con la segunda columna
+	cmp r15, [columna_d_i]						;cuarta columna de bloques
+	jnge _borrar_bloque_c1			;implica choque con la tercera columna
+	cmp r15, [columna_e_i] 					;quinta columna de bloques
+	jnge _borrar_bloque_d1			;implica choque con la cuarta columna
+	cmp r15, [columna_f_i]						;sexta columna de bloques
+	jnge _borrar_bloque_e1			;implica choque con la quinta colmna
+	jge _borrar_bloque_f1			;implica choque con la sexta columna
+;**********borrado bloques columna a
+_borrar_bloque_a3:				
+	mov r10, [bloque13]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque13],r10
+	imprimir bb31,b3_size
+	jmp _rebote_bloque
+	
+
+_borrar_bloque_a2:				
+	mov r10, [bloque7]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque7],r10
+	imprimir bb21,b2_size
+	jmp _rebote_bloque
+
+_borrar_bloque_a1:			
+	mov r10, [bloque1]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque1],r10
+	imprimir bb11,b1_size
+	jmp _rebote_bloque	
+
+;**********borrado bloques columna b
+_borrar_bloque_b3:	
+	mov r10, [bloque14]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque14],r10
+	imprimir bb32,b3_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_b2:				
+	mov r10, [bloque8]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque8],r10
+	imprimir bb22,b2_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_b1:				
+	mov r10, [bloque2]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque2],r10
+	imprimir bb12,b1_size
+	jmp _rebote_bloque	
+
+;**********borrado bloques columna c
+_borrar_bloque_c3:				
+	mov r10, [bloque15]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque15],r10
+	imprimir bb33,b3_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_c2:				
+	mov r10, [bloque9]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque9],r10
+	imprimir bb23,b2_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_c1:				
+	mov r10, [bloque3]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque3],r10
+	imprimir bb13,b1_size
+	jmp _rebote_bloque	
+
+;**********borrado bloques columna d
+_borrar_bloque_d3:				
+	mov r10, [bloque16]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque16],r10
+	imprimir bb34,b3_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_d2:				
+	mov r10, [bloque10]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque10],r10
+	imprimir bb24,b2_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_d1:				
+	mov r10, [bloque4]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque4],r10
+	imprimir bb14,b1_size
+	jmp _rebote_bloque	
+
+;**********borrado bloques columna e
+_borrar_bloque_e3:				
+	mov r10, [bloque17]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque17],r10
+	imprimir bb35,b3_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_e2:				
+	mov r10, [bloque11]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque11],r10
+	imprimir bb25,b2_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_e1:				
+	mov r10, [bloque5]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque5],r10
+	imprimir bb15,b1_size
+	jmp _rebote_bloque	
+
+;**********borrado bloques columna f
+_borrar_bloque_f3:				
+	mov r10, [bloque18]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque18],r10
+	imprimir bb36,b3_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_f2:				
+	mov r10, [bloque12]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque12],r10
+	imprimir bb26,b2_size
+	jmp _rebote_bloque	
+
+_borrar_bloque_f1:				
+	mov r10, [bloque6]
+	cmp r10, 0
+	je _continue_mov
+	mov r10,0
+	mov [bloque6],r10
+	imprimir bb16,b1_size
+	jmp _rebote_bloque	
+;**************************
+_rebote_bloque:
+	pop r10
+	imprimir set_cursor,set_cursor_tam
+	cmp r8,0x0
+	je _ciclo_d
+	jmp _ciclo_c
+
+_continue_mov:			;continua el movimiento en caso de no existir bloque
+	pop r10
+	imprimir set_cursor,set_cursor_tam
+	cmp r8, 0x0
+	je _continue_a
+	jmp _continue_b
+
+;******************************* datos del procesador ******************************
+_fabricante:
+	mov eax,80000002h
+	cpuid
+	mov [family], eax
+	mov [family+4], ebx
+	mov [family+8], ecx
+	mov [family+12], edx
+
+	mov eax,80000003h
+	cpuid
+	mov [family+16], eax
+	mov [family+20], ebx
+	mov [family+24], ecx
+	mov [family+28], edx
+
+	mov eax,80000004h
+	cpuid
+	mov [family+32], eax
+	mov [family+36], ebx
+	mov [family+40], ecx
+	mov [family+44], edx
+	ret
+
+
 salir:
-	imprimir cons_salir, cons_salir_size	
-	call canonical_on  						;vuelve a encender canonical			
+    ;################# pantalla de salida ############################
+
+		
+	call canonical_on  						;vuelve a encender canonical	
+	call _recuadro
+	imprimir cons_despedida,cons_sz_despedida
+	imprimir cons_inst_salida,cons_sz_inst_salida
+	imprimir cons_johan,cons_sz_johan
+	imprimir cons_jafet,cons_sz_jafet
+	imprimir cons_melissa,cons_sz_melissa
+	imprimir cons_dayi,cons_sz_dayi
+
+	call _fabricante
+	imprimir cons_posfamily,cons_sz_posfamily
+	imprimir family,48
+
+	leer tecla,1
+
+	imprimir cons_salir, cons_salir_size
 	call echo_on 							;vuelve a encender echo
 	mov rax,60          				    ;se carga la llamada 60d (sys_exit
 	mov rdi,0              				    ;en rdi se carga un 0
