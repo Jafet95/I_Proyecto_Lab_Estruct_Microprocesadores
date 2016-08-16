@@ -85,14 +85,10 @@ section .data ;
 	b36: db 0x1b, "[7;94f", 0x1b, "[41;31m",  '__________________', 0x1b, "[40;37m"
 	b3_size: equ $-b36
 
-	cons_iniciar: db 0x1b, "[20;40f",'  *                          Presione X para iniciar                                *',0xa 	
+	cons_iniciar: db 0x1b, "[20;14f",'  *                              Presione X para iniciar                            *',0xa 	
 	cons_iniciar_size: equ $-cons_iniciar
-	
-	cons_perder_vida: db 0x1b, "[20;40f",'  *                    Intento fallido - Pierde una vida                 *' ,0xa	
-	cons_perder_vida_size: equ $-cons_perder_vida
-
-	cons_perder: db 0x1b, "[20;40f",'  *                                      GAME OVER!                                        *',0xa 	
-	cons_perder_size: equ $-cons_perder
+	cons_borrar_iniciar: db 0x1b, "[20;14f",'                                                                                     ',0xa 
+	cons_borrar_iniciar_size:equ $-cons_borrar_iniciar
 
 	cons_salir:db  0x1b, "[2J", '',0x1b, "[40;37m",27,"[00;00H"
 	cons_salir_size: equ $-cons_salir
@@ -192,16 +188,16 @@ section .data ;
 	bloque17: dq 1
 	bloque18: dq 1
 
-	bb11: db  27, "[5;4H",27, "[40;30m",  '                   ',0x1b,"[00;00H"
+	bb11: db 0x1b, "[5;04f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
 	bb_size: equ $-bb11 
 	bb12: db 0x1b, "[5;22f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
 	bb13: db 0x1b, "[5;40f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
 	bb14: db 0x1b, "[5;58f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
 	bb15: db 0x1b, "[5;76f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
 	bb16: db 0x1b, "[5;94f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
-	bb1_size: equ 35
+	bb1_size: equ $-bb16
 
-	bb21: db 0x1b, "[6;4f", 0x1b, "[40;30m",  '                  ',0x1b,"[00;00H"
+	bb21: db 0x1b, "[6;04f", 0x1b, "[40;30m",  '                  ',0x1b,"[00;00H"
 	bb22: db 0x1b, "[6;22f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
 	bb23: db 0x1b, "[6;40f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
 	bb24: db 0x1b, "[6;58f", 0x1b, "[40;30m", '                  ',0x1b,"[00;00H"
@@ -236,8 +232,18 @@ section .data ;
 
 	cons_posfamily: db 27, "[41;63H"
 	cons_sz_posfamily: equ $-cons_posfamily
+;##############################   Datos de las vidas  ######################################
+	vida1: dq 1
+	vida2: dq 1
+	vida3: dq 1
+	cons_pierde1	: db 0x1b, "[20;21H",'  *   Intento fallido-Pierde una vida (presione x para continuar)   *',0xa 	
+	cons_pierde1_size: equ $-cons_pierde1
 
+	cons_fin_juego	: db 0x1b, "[20;20H",'  *  Juego finalizado. Mejor suerte la próxima vez - Presione Enter  *',0xa 	
+	cons__fin_juego_size: equ $-cons_fin_juego
 
+	cons_ganador: db 0x1b, "[20;20H",'  *           Felicidades, juego terminado - Presione Enter          *',0xa
+	cons_ganador_size: equ $-cons_ganador
 
 ;##############################   Datos del termios  ######################################
 
@@ -459,6 +465,8 @@ regreso:
 
 
 _canonicos:
+	mov r9,0
+	mov [condicion],r9
 	call canonical_off 		;apaga la funcion canonical	
 	call echo_off 			;apaga la funcion echo
 	call _recuadro
@@ -487,16 +495,32 @@ bloques:
 	imprimir  b36 , b3_size	; imprime b36
 ;-+++++++++++++++++++	Fin de impresión de bloques		+++++++++++++++++++++++++++++++
 
-
-imprimir set_cursor,set_cursor_tam
 jugador:
 	imprimir cons_jugador  ,cons_jugador_size  		;imprime jugador en la primera linea
 	imprimir player,sz_player
 ;imprime vidas en la primera linea
 	imprimir cons_vidas   ,cons_vidas_size  
+	mov r9,[vida1]
+	cmp r9, 0
+	je salir
 	imprimir cons_corazon1   ,cons_corazon1_size
+	imprimir cons_pierde1,cons_pierde1_size
+	imprimir set_cursor,set_cursor_tam
+	mov r9,[vida2]
+	cmp r9, 0
+	je _refresh_plataforma
 	imprimir cons_corazon2   ,cons_corazon1_size
+	imprimir cons_pierde1,cons_pierde1_size
+	imprimir set_cursor,set_cursor_tam
+	mov r9,[vida3]
+	cmp r9, 0
+	je _refresh_plataforma
 	imprimir cons_corazon3   ,cons_corazon1_size
+	imprimir set_cursor,set_cursor_tam
+	imprimir cons_borrar_iniciar,cons_borrar_iniciar_size
+	imprimir set_cursor,set_cursor_tam
+	imprimir cons_iniciar,cons_iniciar_size
+	imprimir set_cursor,set_cursor_tam
 
 _refresh_plataforma:						;Refresca la plataforma en caso de que se indicara movimiento
 	imprimir  cons_pospl, cons_sz_pospl		;mover cursor a la fila donde se debe colocar la plataforma
@@ -559,8 +583,6 @@ _borrar_bola:
 	jne _ciclos
 
 _imprimir_bola:
-	pop r14
-	pop r15
 	call _posiciones
 	imprimir bola, bola_tam						;imprime la bola
 	call _cursor_pos 							;Pongo el cusor de nuevo en el inicio
@@ -568,9 +590,30 @@ _imprimir_bola:
 	mov r13, 1									;reestablece el contador del tiempo
 _delay:											;generador del delay 
  	cmp r13, 10000000							;cantidad de tiempo de espera
- 	je _r_tecla
+ 	je _winner
  	inc r13
  	jmp _delay		;continua con el ciclo hasta que se cumpla el tiempo estipulado
+
+_winner:
+	mov r9, [bloque1]
+	cmp r9, 1
+	je _r_tecla
+	mov r9, [bloque2]
+	cmp r9, 1
+	je _r_tecla
+	mov r9, [bloque3]
+	cmp r9, 1
+	je _r_tecla
+	mov r9, [bloque4]
+	cmp r9, 1
+	je _r_tecla
+	mov r9, [bloque5]
+	cmp r9, 1
+	je _r_tecla
+	mov r9, [bloque6]
+	cmp r9, 1
+	je _r_tecla
+	jmp _gano
 
 _r_tecla:
 	pop r13
@@ -586,9 +629,6 @@ _read_tecla:								;Lectura de la tecla
 	mov r9,'c'                                  	;rbx = constante de movimiento a la derecha
 	cmp r8,r9                                   	;comparacion
 	je _derecha                                 	;salto a .derecha
-	mov r9, 'h'
-	cmp r8, r9
-	je salir
 	mov r9,'x'
 	cmp r8,r9
 	je _cambio_condicion
@@ -602,6 +642,9 @@ _cambio_condicion:
 	pop r8
 	mov rax, 1
 	mov [condicion], rax
+	imprimir set_cursor,set_cursor_tam
+	imprimir cons_borrar_iniciar,cons_borrar_iniciar_size
+	imprimir set_cursor,set_cursor_tam
 	jmp _borrar_bola
 
 _izquierda:									;movimiento hacia la izquierda de la plataforma
@@ -669,7 +712,6 @@ _ciclo_a:						;movimiento arriba-derecha
 _continue_a:
 	call _mov_arriba
 	call _mov_derecha
-	push r13
 	jmp _imprimir_bola
 _ciclo_b:						;movimiento arriba-izquierda
 	mov r8, 0x1					;cambio de la constante para poder volver ciclicamente al proceso
@@ -687,7 +729,6 @@ _ciclo_b:						;movimiento arriba-izquierda
 _continue_b:
 	call _mov_arriba
 	call _mov_izquierda
-	push r13
 	jmp _imprimir_bola
 
 
@@ -715,7 +756,6 @@ _ciclo_c:						;movimiento abajo-izquierda
 .continuar:						; en caso de que no hayamos llegado a la posición límite
 	call _mov_izquierda
 	call _mov_abajo
-	push r13
 	jmp _imprimir_bola
 
 _ciclo_d:						;movimiento abajo-derecha
@@ -742,7 +782,6 @@ _ciclo_d:						;movimiento abajo-derecha
 .continua:						; en caso de que no hayamos llegado a la posición límite
 	call _mov_abajo
 	call _mov_derecha
-	push r13
 	jmp _imprimir_bola
 
 ;Movimientos bàsicos
@@ -761,13 +800,48 @@ _mov_izquierda:					;movimiento hacia izquierda en 45º
 ;******************************	Fin Movimientos en 45º	*******************************
 
 _perder_vida:
-	push r15
-	mov r15, 1
-.tiempo:
-	cmp r15, 100000000
-	je salir
-	inc r15
-	jmp .tiempo
+	push r8
+	mov r8, 1
+	mov [bloque1], r8
+	mov [bloque2], r8
+	mov [bloque3], r8
+	mov [bloque4], r8
+	mov [bloque5], r8
+	mov [bloque6], r8
+	mov [bloque7], r8
+	mov [bloque8], r8
+	mov [bloque9], r8
+	mov [bloque10], r8
+	mov [bloque11], r8
+	mov [bloque12], r8
+	mov [bloque13], r8
+	mov [bloque14], r8
+	mov [bloque15], r8
+	mov [bloque16], r8
+	mov [bloque17], r8
+	mov [bloque18], r8
+	pop r8
+	mov r9,[vida3]
+	cmp r9, 0
+_perder_vida_1:
+	je _lose_vida2
+	mov r9,0
+	mov [vida3],r9
+	jmp _canonicos
+
+_lose_vida2:
+	mov r9,[vida2]
+	cmp r9, 0
+	je _lose_vida1
+	mov r9,0
+	mov [vida2],r9
+	jmp _canonicos
+
+_lose_vida1:
+	mov r9,0
+	mov [vida1],r9
+	jmp _game_over
+
 
 _cursor_pos:					;genera que el cursor se coloque al inicio de la pantalla
 	imprimir set_cursor, set_cursor_tam
@@ -1021,7 +1095,15 @@ _fabricante:
 	mov [family+40], ecx
 	mov [family+44], edx
 	ret
+_gano: call canonical_on  						;vuelve a encender canonical
+	imprimir cons_ganador,cons_ganador_size
+	leer tecla,1
+	jmp salir
 
+_game_over:
+	call canonical_on  						;vuelve a encender canonical
+	imprimir cons_fin_juego,cons__fin_juego_size
+	leer tecla,1
 
 salir:
     ;################# pantalla de salida ############################
