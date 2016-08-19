@@ -52,6 +52,11 @@ section .data ;
 
 	cons_superior: db 0x1b, "[2;1f", '  '; esquina superior izquierda
 	cons_superior_size: equ $-cons_superior
+														
+	cons_techo1: db  0x1b, "[3;4f",0x1b, "[47;37m", 	       '                                                                                                            ', 0x1b, "[40;37m"
+	cons_techo2: db  0x1b, "[4;4f",0x1b, "[47;37m", 	       '____________________________________________________________________________________________________________', 0x1b, "[40;37m"
+	cons_techo1_size: equ $- cons_techo1
+	cons_techo2_size: equ $- cons_techo2
 
 	cons_inferior: db 0x1b, "[43;1f", '  '	;esquina inferior izquierda
 	cons_inferior_size: equ $-cons_inferior
@@ -425,8 +430,7 @@ _recuadro:
 
 	
 	imprimir cons_superior   ,cons_superior_size		;imprimir linea superior de techo
-
-	
+			
 	mov r9,55				;(55x2=110, eso xq uso el caracter y un espacio)
 	mov r10,50				;define la cantidad de espacios inicial de la plataforma
 	mov r13, 57 			;se inicializa r13 usado para posicion en x de la bola
@@ -472,6 +476,9 @@ _canonicos:
 	call _recuadro
 ;+++++++++++++++++++++++++	Imprime bloques		++++++++++++++++++++++++++++++++++
 bloques:	
+	imprimir cons_techo1, cons_techo1_size
+	imprimir cons_techo2, cons_techo2_size
+
 	imprimir set_cursor,set_cursor_tam
 	imprimir  b11 , b_size		; imprime b11
 	imprimir  b12 , b_size		; imprime b12
@@ -498,7 +505,7 @@ bloques:
 jugador:
 	imprimir cons_jugador  ,cons_jugador_size  		;imprime jugador en la primera linea
 	imprimir player,sz_player
-;imprime vidas en la primera linea
+	;imprime vidas en la primera linea
 	imprimir cons_vidas   ,cons_vidas_size  
 	mov r9,[vida1]
 	cmp r9, 0
