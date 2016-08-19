@@ -27,6 +27,11 @@ section .bss ; $Revision: 1.6 $
 family		resd	48						;variable de nombre del fabricante
 
 section .data ; 
+	
+	num_random: dq 0x0						;guarda el numero random entre 1 y 4096
+	cond_ciclos: dq 0x0						;
+	choice_cycles: dq 0x0					;eleccion de ciclos 
+	delay_const1: dq 5000000
 
 ;########################  Datos de la Interfaz  ################################################
 
@@ -52,7 +57,7 @@ section .data ;
 
 	cons_superior: db 0x1b, "[2;1f", '  '; esquina superior izquierda
 	cons_superior_size: equ $-cons_superior
-														
+
 	cons_techo1: db  0x1b, "[3;4f",0x1b, "[47;37m", 	       '                                                                                                            ', 0x1b, "[40;37m"
 	cons_techo2: db  0x1b, "[4;4f",0x1b, "[47;37m", 	       '____________________________________________________________________________________________________________', 0x1b, "[40;37m"
 	cons_techo1_size: equ $- cons_techo1
@@ -250,6 +255,9 @@ section .data ;
 	cons_ganador: db 0x1b, "[20;20H",'  *           Felicidades, juego terminado - Presione Enter          *',0xa
 	cons_ganador_size: equ $-cons_ganador
 
+	cons_bcorazon1: db 27, "[44;68H", ' '
+	bcorazon1_tam: equ $-cons_bcorazon1
+
 ;##############################   Datos del termios  ######################################
 
 	termios: times 36 db 0                   ;Estructura de 36bytes que contiene el modo de operacion de la consola
@@ -421,21 +429,17 @@ _pantalla_principal:
 	leer player,sz_player
 	jmp _canonicos
 	
-
 ;############################ fin pantalla principal #########################################
-
 
 _recuadro:
 	limpiar_pantalla limpiar,limpiar_tam			;limpia la pantalla
 
-	
 	imprimir cons_superior   ,cons_superior_size		;imprimir linea superior de techo
-			
+	
 	mov r9,55				;(55x2=110, eso xq uso el caracter y un espacio)
 	mov r10,50				;define la cantidad de espacios inicial de la plataforma
 	mov r13, 57 			;se inicializa r13 usado para posicion en x de la bola
 	mov r12, 39				;se inicializa r12 usado para posicion en y de la bola
-	mov r8, 0x0				;se inicializa r8 usado para referirse al ciclo de movimiento de la bola
 
 superior: cmp r9,0
 	je sig
@@ -467,13 +471,78 @@ inferior:
 regreso:
 	ret
 
-
 _canonicos:
+	rdtsc 										;realiza el random
+	and eax, 0xfff								; se hace un random hasta 4095
+	mov [num_random], eax						; guarda el random en num_random
+	mov r9, [num_random]
+	cmp r9, 0x2aa
+	jnge _ciclos_45
+	cmp r9, 0x554
+	jnge _ciclos_n22
+	cmp r9, 0x7fe
+	jnge _ciclos_11
+	cmp r9, 0xaa8
+	jnge _ciclos_22
+	cmp r9, 0xd52
+	jnge _ciclos_n45
+	jmp _ciclos_n11
+_ciclos_45:
+	mov r8, 0x0
+	mov [choice_cycles], r8
+	mov r8, 500000
+	mov [delay_const1], r8
+	mov r8, 0x0
+	mov [cond_ciclos], r8
+	jmp _final_canonicos
+_ciclos_n45:
+	mov r8, 0x0
+	mov [choice_cycles], r8
+	mov r8, 500000
+	mov [delay_const1], r8
+	mov r8, 0x1
+	mov [cond_ciclos], r8
+	jmp _final_canonicos
+_ciclos_22:
+	mov r8, 0x1
+	mov [choice_cycles], r8
+	mov r8, 7000000
+	mov [delay_const1], r8
+	mov r8, 0x0
+	mov [cond_ciclos], r8
+	jmp _final_canonicos
+_ciclos_n22:
+	mov r8, 0x1
+	mov [choice_cycles], r8
+	mov r8, 7000000
+	mov [delay_const1], r8
+	mov r8, 0x1
+	mov [cond_ciclos], r8
+	jmp _final_canonicos
+_ciclos_11:
+	mov r8, 0x2
+	mov [choice_cycles], r8
+	mov r8, 12000000
+	mov [delay_const1], r8
+	mov r8, 0x0
+	mov [cond_ciclos], r8
+	jmp _final_canonicos
+_ciclos_n11:
+	mov r8, 0x2
+	mov [choice_cycles], r8
+	mov r8, 12000000
+	mov [delay_const1], r8
+	mov r8, 0x1
+	mov [cond_ciclos], r8
+	jmp _final_canonicos
+
+_final_canonicos:
 	mov r9,0
 	mov [condicion],r9
 	call canonical_off 		;apaga la funcion canonical	
 	call echo_off 			;apaga la funcion echo
 	call _recuadro
+
 ;+++++++++++++++++++++++++	Imprime bloques		++++++++++++++++++++++++++++++++++
 bloques:	
 	imprimir cons_techo1, cons_techo1_size
@@ -505,7 +574,7 @@ bloques:
 jugador:
 	imprimir cons_jugador  ,cons_jugador_size  		;imprime jugador en la primera linea
 	imprimir player,sz_player
-	;imprime vidas en la primera linea
+;imprime vidas en la primera linea
 	imprimir cons_vidas   ,cons_vidas_size  
 	mov r9,[vida1]
 	cmp r9, 0
@@ -551,7 +620,6 @@ _plataforma:								;Imprimir la plataforma
 	mov rax, [cons_mov_plataforma]
 	cmp rax,4
 	je _borrar_bola
-_bpoint:
 	mov rax, [cons_mov_plataforma]
 	cmp rax,1
 	je _borrar_bola
@@ -587,7 +655,7 @@ _borrar_bola:
 	mov r15, [condicion]
 	cmp r15, r14
 	je _imprimir_bola
-	jne _ciclos
+	jne _select_ciclos
 
 _imprimir_bola:
 	call _posiciones
@@ -596,7 +664,8 @@ _imprimir_bola:
 	push r13
 	mov r13, 1									;reestablece el contador del tiempo
 _delay:											;generador del delay 
- 	cmp r13, 10000000							;cantidad de tiempo de espera
+ 	mov r8, [delay_const1]
+ 	cmp r13, r8							;cantidad de tiempo de espera
  	je _winner
  	inc r13
  	jmp _delay		;continua con el ciclo hasta que se cumpla el tiempo estipulado
@@ -689,11 +758,20 @@ _derecha:									;movimiento hacia la derecha de la plataforma
 	mov [posicion_plataf], r10
 	jmp _refresh_plataforma						;Refresca
 
-_ciclos:
+_select_ciclos:
 	pop r14
 	pop r15
+	mov r8, [choice_cycles]
 	cmp r8, 0x0
-	je _ciclo_a
+	je _ciclos
+	cmp r8, 0x1
+	je _ciclos_secundarios
+	jne _ciclos_terceros
+
+_ciclos:
+	mov r8, [cond_ciclos]
+	cmp r8, 0x0
+	je _ciclo_a		
 	cmp r8, 0x1
 	je _ciclo_b
 	cmp r8, 0x2
@@ -701,10 +779,33 @@ _ciclos:
 	cmp r8, 0x3
 	je _ciclo_d
 
+_ciclos_secundarios:
+	mov r8, [cond_ciclos]
+	cmp r8, 0x0
+	je _ciclo_am				
+	cmp r8, 0x1
+	je _ciclo_bm
+	cmp r8, 0x2
+	je _ciclo_cm
+	cmp r8, 0x3
+	je _ciclo_dm
+
+_ciclos_terceros:
+	mov r8, [cond_ciclos]
+	cmp r8, 0x0
+	je _ciclo_at			
+	cmp r8, 0x1
+	je _ciclo_bt
+	cmp r8, 0x2
+	je _ciclo_ct
+	cmp r8, 0x3
+	je _ciclo_dt
+
 ;*******************************	Movimientos en 45º	************************************
 ;Ciclos de movimiento
 _ciclo_a:						;movimiento arriba-derecha
 	mov r8, 0x0					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
 	cmp r15, 111				;limite derecho
 	je _ciclo_b
 
@@ -722,6 +823,7 @@ _continue_a:
 	jmp _imprimir_bola
 _ciclo_b:						;movimiento arriba-izquierda
 	mov r8, 0x1					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
 	cmp r15, 4					;limite izquierdo
 	je _ciclo_a
 	
@@ -738,9 +840,9 @@ _continue_b:
 	call _mov_izquierda
 	jmp _imprimir_bola
 
-
 _ciclo_c:						;movimiento abajo-izquierda
 	mov r8, 0x2					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
 	cmp r15, 4					;limite izquierdo
 	je _ciclo_d
 	cmp r14, 39					;limite inferior
@@ -767,6 +869,7 @@ _ciclo_c:						;movimiento abajo-izquierda
 
 _ciclo_d:						;movimiento abajo-derecha
 	mov r8, 0x3					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
 	cmp r15, 111				;limite derecho
 	je _ciclo_c
 	cmp r14, 39					;limite inferior
@@ -791,6 +894,232 @@ _ciclo_d:						;movimiento abajo-derecha
 	call _mov_derecha
 	jmp _imprimir_bola
 
+;******************************		Fin Movimientos en 45º		*******************************
+
+
+;******************************		Movimientos en 22	*************************
+_ciclo_am:						;movimiento arriba-derecha
+	mov r8, 0x0					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
+	cmp r15, 111				;limite derecho
+	je _ciclo_bm
+	cmp r14, 5					;limite superior
+	je _ciclo_dm
+	cmp r14, 6					;limite superior
+	je _colisiones_1
+	cmp r14, 7					;limite superior
+	je _colisiones_2
+	cmp r14, 8					;limite superior
+	je _colisiones_3
+_continue_am:
+	call _mov_arriba
+	call _mov_derecha
+	call _mov_derecha
+	cmp r13, 111
+	jg _excp_1
+	jmp _imprimir_bola
+_excp_1:
+	call _mov_izquierda
+	cmp r13, 111
+	jg _excp_1
+	jmp _imprimir_bola
+
+_ciclo_bm:						;movimiento arriba-izquierda
+	mov r8, 0x1					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
+	cmp r15, 4					;limite izquierdo
+	je _ciclo_am
+	cmp r14, 5					;limite superior
+	je _ciclo_cm
+	cmp r14, 6					;limite superior
+	je _colisiones_1
+	cmp r14, 7					;limite superior
+	je _colisiones_2
+	cmp r14, 8					;limite superior
+	je _colisiones_3
+_continue_bm:
+	call _mov_arriba
+	call _mov_izquierda
+	call _mov_izquierda
+	cmp r13, 4
+	jnge _excp_2
+	jmp _imprimir_bola
+_excp_2:
+	call _mov_derecha
+	cmp r13, 4
+	jnge _excp_2
+	jmp _imprimir_bola
+
+_ciclo_cm:						;movimiento abajo-izquierda
+	mov r8, 0x2					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
+	cmp r15, 4					;limite izquierdo
+	je _ciclo_dm
+	cmp r14, 39					;limite inferior
+	je .verificar_plataf_m			;voy a verificar que esté la plataforma debajo de la bola para que rebote
+	jne .continuar_m
+.verificar_plataf_m:				;verifica si estamos en la posición donde se encuentra la plataforma
+	mov rax, 3
+	add [posicion_plataf], rax
+	mov rax, [posicion_plataf]
+	cmp r15, rax
+	jge .verificar_plat_fin_m		;implica que podemos estar en la plataforma, hay que ver si estamos dentro o fuera
+	jnge _perder_vida			;implica que no estamos muy a la izquierda de la plataforma
+.verificar_plat_fin_m:			;verificamos que estemos dentro de la plataforma
+	mov rax, 9
+	add [posicion_plataf], rax	;nos movemos los nueve espacios que son la longitud de la plataforma desde el inicio de ella
+	mov rax, [posicion_plataf]
+	cmp r13, rax
+	jnge _ciclo_bm 				;implica que nos encontramos dentro de ella y por ende debemos rebotar
+	jmp _perder_vida			; implica que estamos fuera de la plataforma y debemos perder una vida
+.continuar_m:						; en caso de que no hayamos llegado a la posición límite
+	call _mov_izquierda
+	call _mov_izquierda
+	call _mov_abajo
+	cmp r13, 4
+	jnge _excp_2
+	jmp _imprimir_bola
+
+_ciclo_dm:						;movimiento abajo-derecha
+	mov r8, 0x3					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
+	cmp r15, 111				;limite derecho
+	je _ciclo_cm
+	cmp r14, 39					;limite inferior
+	je .verificar_platafor_m			;voy a verificar que esté la plataforma debajo de la bola para que rebote
+	jne .continua_m
+.verificar_platafor_m:				;verifica si estamos en la posición donde se encuentra la plataforma
+	mov rax, 3
+	add [posicion_plataf], rax
+	mov rax, [posicion_plataf]
+	cmp r15, rax
+	jge .verificar_plat_final_m		;implica que podemos estar en la plataforma, hay que ver si estamos dentro o fuera
+	jnge _perder_vida			;implica que no estamos muy a la izquierda de la plataforma
+.verificar_plat_final_m:			;verificamos que estemos dentro de la plataforma
+	mov rax, 9
+	add [posicion_plataf], rax	;nos movemos los nueve espacios que son la longitud de la plataforma desde el inicio de ella
+	mov rax, [posicion_plataf]
+	cmp r13, rax
+	jnge _ciclo_am				;implica que nos encontramos dentro de ella y por ende debemos rebotar
+	jge _perder_vida			; implica que estamos fuera de la plataforma y debemos perder una vida
+.continua_m:						; en caso de que no hayamos llegado a la posición límite
+	call _mov_abajo
+	call _mov_derecha
+	call _mov_derecha
+	cmp r13, 111
+	jg _excp_1
+	jmp _imprimir_bola
+
+;******************************		Fin de movimientos en 22	*******************
+
+;*******************************	Movimientos en 11º	************************************
+_ciclo_at:						;movimiento arriba-derecha
+	mov r8, 0x0					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
+	cmp r15, 111				;limite derecho
+	je _ciclo_bt
+	cmp r14, 5					;limite superior
+	je _ciclo_dt
+	cmp r14, 6					;limite superior
+	je _colisiones_1
+	cmp r14, 7					;limite superior
+	je _colisiones_2
+	cmp r14, 8					;limite superior
+	je _colisiones_3
+_continue_at:
+	call _mov_arriba
+	call _mov_derecha
+	call _mov_derecha
+	call _mov_derecha
+	cmp r13, 111
+	jg _excp_1
+	jmp _imprimir_bola
+
+_ciclo_bt:						;movimiento arriba-izquierda
+	mov r8, 0x1					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
+	cmp r15, 4					;limite izquierdo
+	je _ciclo_at
+	cmp r14, 5					;limite superior
+	je _ciclo_ct
+	cmp r14, 6					;limite superior
+	je _colisiones_1
+	cmp r14, 7					;limite superior
+	je _colisiones_2
+	cmp r14, 8					;limite superior
+	je _colisiones_3
+_continue_bt:
+	call _mov_arriba
+	call _mov_izquierda
+	call _mov_izquierda
+	call _mov_izquierda
+	cmp r13, 4
+	jnge _excp_2
+	jmp _imprimir_bola
+
+_ciclo_ct:						;movimiento abajo-izquierda
+	mov r8, 0x2					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
+	cmp r15, 4					;limite izquierdo
+	je _ciclo_dt
+	cmp r14, 39					;limite inferior
+	je .verificar_plataf_t			;voy a verificar que esté la plataforma debajo de la bola para que rebote
+	jne .continuar_t
+.verificar_plataf_t:				;verifica si estamos en la posición donde se encuentra la plataforma
+	mov rax, 3
+	add [posicion_plataf], rax
+	mov rax, [posicion_plataf]
+	cmp r15, rax
+	jge .verificar_plat_fin_t		;implica que podemos estar en la plataforma, hay que ver si estamos dentro o fuera
+	jnge _perder_vida			;implica que no estamos muy a la izquierda de la plataforma
+.verificar_plat_fin_t:			;verificamos que estemos dentro de la plataforma
+	mov rax, 9
+	add [posicion_plataf], rax	;nos movemos los nueve espacios que son la longitud de la plataforma desde el inicio de ella
+	mov rax, [posicion_plataf]
+	cmp r13, rax
+	jnge _ciclo_bt 				;implica que nos encontramos dentro de ella y por ende debemos rebotar
+	jmp _perder_vida			; implica que estamos fuera de la plataforma y debemos perder una vida
+.continuar_t:						; en caso de que no hayamos llegado a la posición límite
+	call _mov_izquierda
+	call _mov_izquierda
+	call _mov_izquierda
+	call _mov_abajo
+	cmp r13, 4
+	jnge _excp_2
+	jmp _imprimir_bola
+
+_ciclo_dt:						;movimiento abajo-derecha
+	mov r8, 0x3					;cambio de la constante para poder volver ciclicamente al proceso
+	mov [cond_ciclos], r8
+	cmp r15, 111				;limite derecho
+	je _ciclo_ct
+	cmp r14, 39					;limite inferior
+	je .verificar_platafor_t			;voy a verificar que esté la plataforma debajo de la bola para que rebote
+	jne .continua_t
+.verificar_platafor_t:				;verifica si estamos en la posición donde se encuentra la plataforma
+	mov rax, 3
+	add [posicion_plataf], rax
+	mov rax, [posicion_plataf]
+	cmp r15, rax
+	jge .verificar_plat_final_t		;implica que podemos estar en la plataforma, hay que ver si estamos dentro o fuera
+	jnge _perder_vida			;implica que no estamos muy a la izquierda de la plataforma
+.verificar_plat_final_t:			;verificamos que estemos dentro de la plataforma
+	mov rax, 9
+	add [posicion_plataf], rax	;nos movemos los nueve espacios que son la longitud de la plataforma desde el inicio de ella
+	mov rax, [posicion_plataf]
+	cmp r13, rax
+	jnge _ciclo_at				;implica que nos encontramos dentro de ella y por ende debemos rebotar
+	jge _perder_vida			; implica que estamos fuera de la plataforma y debemos perder una vida
+.continua_t:						; en caso de que no hayamos llegado a la posición límite
+	call _mov_abajo
+	call _mov_derecha
+	call _mov_derecha
+	call _mov_derecha
+	cmp r13, 111
+	jg _excp_1
+	jmp _imprimir_bola
+;******************************		Fin Movimientos en 11º		*******************************
+
 ;Movimientos bàsicos
 _mov_arriba:					;movimiento hacia arriba en 45º
 	dec r12
@@ -804,7 +1133,6 @@ _mov_abajo:						;movimiento hacia abajo en 45º
 _mov_izquierda:					;movimiento hacia izquierda en 45º
 	dec r13
 	ret
-;******************************	Fin Movimientos en 45º	*******************************
 
 _perder_vida:
 	push r8
@@ -848,7 +1176,6 @@ _lose_vida1:
 	mov r9,0
 	mov [vida1],r9
 	jmp _game_over
-
 
 _cursor_pos:					;genera que el cursor se coloque al inicio de la pantalla
 	imprimir set_cursor, set_cursor_tam
@@ -1068,16 +1395,52 @@ _borrar_bloque_f1:
 _rebote_bloque:
 	pop r10
 	imprimir set_cursor,set_cursor_tam
+	mov r8, [choice_cycles]
+	cmp r8, 0x0
+	je _reb_45
+	cmp r8, 0x1
+	je _reb_22
+	jne _reb_11
+_reb_45:	
+	mov r8, [cond_ciclos]
 	cmp r8,0x0
-	je _ciclo_d
+	je _ciclo_d				
 	jmp _ciclo_c
+_reb_22:
+	mov r8, [cond_ciclos]
+	cmp r8,0x0
+	je _ciclo_dm			
+	jmp _ciclo_cm
+_reb_11:
+	mov r8, [cond_ciclos]
+	cmp r8,0x0
+	je _ciclo_dt 			
+	jmp _ciclo_ct
 
 _continue_mov:			;continua el movimiento en caso de no existir bloque
 	pop r10
 	imprimir set_cursor,set_cursor_tam
+	mov r8, [choice_cycles]
 	cmp r8, 0x0
-	je _continue_a
+	je _con_45
+	cmp r8, 0x1
+	je _con_22
+	jne _con_11
+_con_45:
+	mov r8, [cond_ciclos]
+	cmp r8, 0x0
+	je _continue_a			
 	jmp _continue_b
+_con_22:
+	mov r8, [cond_ciclos]
+	cmp r8, 0x0
+	je _continue_am 		
+	jmp _continue_bm
+_con_11:
+	mov r8, [cond_ciclos]
+	cmp r8, 0x0
+	je _continue_at 		
+	jmp _continue_bt
 
 ;******************************* datos del procesador ******************************
 _fabricante:
@@ -1110,11 +1473,11 @@ _gano: call canonical_on  						;vuelve a encender canonical
 _game_over:
 	call canonical_on  						;vuelve a encender canonical
 	imprimir cons_fin_juego,cons__fin_juego_size
+	imprimir cons_bcorazon1, bcorazon1_tam
 	leer tecla,1
 
 salir:
     ;################# pantalla de salida ############################
-
 		
 	call canonical_on  						;vuelve a encender canonical	
 	call _recuadro
